@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id          String       @id @default(uuid())
+  name        String
+  users       User[]
+  departments Department[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Department {
+  id             String           @id @default(uuid())
+  name           String
+  organizationId String
+  organization   Organization     @relation(fields: [organizationId], references: [id])
+  users          DepartmentUser[]
+  vaultItems     VaultItem[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model User {
+  id                 String           @id @default(uuid())
+  email              String           @unique
+  masterPasswordHash String
+  name               String
+  role               String           @default("USER") // Changed from enum Role
+  organizationId     String?
+  organization       Organization?    @relation(fields: [organizationId], references: [id])
+  departments        DepartmentUser[]
+  personalVaultItems VaultItem[]
+  auditLogs          AuditLog[]
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+}
+
+model DepartmentUser {
+  id           String     @id @default(uuid())
+  userId       String
+  departmentId String
+  permission   String     @default("READ") // Changed from enum Permission
+  user         User       @relation(fields: [userId], references: [id])
+  department   Department @relation(fields: [departmentId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([userId, departmentId])
+}
+
+model Collection {
+  id         String      @id @default(uuid())
+  name       String
+  vaultItems VaultItem[]
+}
+
+model VaultItem {
+  id           String      @id @default(uuid())
+  name         String
+  username     String?
+  password     String? // Encrypted
+  url          String?
+  domain       String?     // Extracted domain for matching
+  notes        String? // Encrypted
+  isHidden     Boolean     @default(false)
+  
+  // Can belong to a user (personal) OR a department (organization)
+  userId       String?
+  user         User?       @relation(fields: [userId], references: [id])
+  
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  collectionId String?
+  collection   Collection? @relation(fields: [collectionId], references: [id])
+
+  auditLogs    AuditLog[]
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String   // "REVEAL", "AUTOFILL", "COPY", "LOGIN"
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  itemId    String?
+  item      VaultItem? @relation(fields: [itemId], references: [id])
+  timestamp DateTime @default(now())
+  details   String?
+}

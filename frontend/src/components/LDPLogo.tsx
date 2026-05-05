@@ -1,0 +1,18 @@
+import React from 'react';
+
+const LDPLogo: React.FC<{ className?: string }> = ({ className = "w-8 h-8" }) => {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path 
+        d="M12 2L4 5V11C4 16.19 7.41 21.05 12 22C16.59 21.05 20 16.19 20 11V5L12 2Z" 
+        fill="#175ddc"
+      />
+      <path 
+        d="M12 4.4L5.6 7.1V11.2C5.6 15.35 8.33 19.24 12 20.4V4.4Z" 
+        fill="#134db8"
+      />
+    </svg>
+  );
+};
+
+export default LDPLogo;

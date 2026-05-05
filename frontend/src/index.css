@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+:root {
+  --primary: #175ddc;
+  --primary-hover: #134db8;
+  --background: #f8f9fc;
+  --surface: #ffffff;
+  --text-primary: #2b394f;
+  --text-secondary: #677489;
+  --border: #e1e8f5;
+  --sidebar-bg: #1e2735;
+  --danger: #dc3545;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background);
+  color: var(--text-primary);
+}
+
+.btn-primary {
+  @apply bg-[#175ddc] hover:bg-[#134db8] text-white font-bold py-2.5 px-6 rounded transition-all uppercase text-xs tracking-wide shadow-sm;
+}
+
+.btn-secondary {
+  @apply bg-[#f0f3f8] hover:bg-[#e4e9f2] text-[#2b394f] font-bold py-2.5 px-6 rounded transition-all uppercase text-xs tracking-wide;
+}
+
+.input-field {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#175ddc] focus:border-[#175ddc] transition-all text-sm bg-white;
+}
