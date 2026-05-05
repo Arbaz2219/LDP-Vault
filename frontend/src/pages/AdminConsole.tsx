@@ -6,7 +6,6 @@ import {
   Plus, 
   Shield, 
   Settings, 
-  Trash2, 
   UserPlus, 
   Layers, 
   BarChart2, 
@@ -14,7 +13,6 @@ import {
   Globe, 
   MoreVertical,
   Search,
-  CheckCircle2,
   ChevronDown,
   LayoutGrid,
   Info
@@ -39,14 +37,13 @@ interface Member {
 }
 
 const AdminConsole: React.FC = () => {
-  const { token, user } = useAuth();
+  const { token } = useAuth();
   const [activeTab, setActiveTab] = useState<'collections' | 'members' | 'groups' | 'settings'>('collections');
   const [departments, setDepartments] = useState<Department[]>([]);
-  const [loading, setLoading] = useState(true);
   const [newDeptName, setNewDeptName] = useState('');
   
   // Simulated members for the mockup
-  const [members, setMembers] = useState<Member[]>([
+  const [members] = useState<Member[]>([
     { id: '1', name: 'Super Admin', email: 'help-desk@ldplogistics.com', role: 'Admin', status: 'Active' },
     { id: '2', name: 'Arbaz Khan', email: 'arbaz@ldplogistics.com', role: 'User', status: 'Active' },
   ]);
@@ -60,7 +57,7 @@ const AdminConsole: React.FC = () => {
     } catch (err) {
       console.error('Failed to fetch departments');
     } finally {
-      setLoading(false);
+      // Done
     }
   };
 

@@ -8,19 +8,9 @@ import {
   BarChart2, 
   Settings, 
   LayoutDashboard, 
-  Users,
   LogOut,
   Lock,
-  ChevronDown,
-  Key,
-  Globe,
-  CreditCard,
-  User,
-  FileText,
-  Terminal,
-  Folder,
-  Layers,
-  Search
+  ChevronDown
 } from 'lucide-react';
 import LDPLogo from './LDPLogo';
 

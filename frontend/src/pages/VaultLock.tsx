@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import BitwardenLockIcon from '../components/LockIcon';
 import LDPLogo from '../components/LDPLogo';
 

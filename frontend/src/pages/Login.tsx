@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
-import { LogIn, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import LDPLogo from '../components/LDPLogo';
 
 const Login: React.FC = () => {

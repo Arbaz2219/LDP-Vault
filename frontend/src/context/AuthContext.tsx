@@ -11,7 +11,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isLocked: boolean;
-  login: (token: string, user: User) => void;
+  login: (token: string, user: User, password?: string) => void;
   logout: () => void;
   unlock: (password: string) => Promise<boolean>;
   lock: () => void;
@@ -78,7 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Auto-lock after 3 minutes of inactivity
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
+    let timeout: any;
 
     const resetTimer = () => {
       if (timeout) clearTimeout(timeout);

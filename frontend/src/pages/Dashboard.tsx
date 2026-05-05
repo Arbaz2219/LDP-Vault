@@ -4,14 +4,11 @@ import { useAuth } from '../context/AuthContext';
 import { 
   Search, 
   Plus, 
-  Filter, 
-  Key, 
   Info, 
   MoreVertical, 
   Copy, 
   Eye, 
   EyeOff, 
-  Save, 
   X,
   Globe,
   CreditCard,
@@ -22,7 +19,8 @@ import {
   Layers,
   Star,
   ChevronDown,
-  LayoutGrid
+  LayoutGrid,
+  Lock
 } from 'lucide-react';
 import LDPLogo from '../components/LDPLogo';
 import { encrypt, decrypt } from '../utils/crypto';
