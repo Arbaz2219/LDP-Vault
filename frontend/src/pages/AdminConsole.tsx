@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api, { API_URL } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { 
   Users, 
@@ -50,7 +50,7 @@ const AdminConsole: React.FC = () => {
 
   const fetchDepartments = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/org/departments', {
+      const response = await api.get('/api/org/departments', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDepartments(response.data);
@@ -61,7 +61,7 @@ const AdminConsole: React.FC = () => {
 
   const fetchMembers = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/org/users', {
+      const response = await api.get('/api/org/users', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMembers(response.data);
@@ -72,7 +72,7 @@ const AdminConsole: React.FC = () => {
 
   const fetchOrgDetails = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/org', {
+      const response = await api.get('/api/org', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data) setOrgName(response.data.name);
@@ -91,7 +91,7 @@ const AdminConsole: React.FC = () => {
 
   const handleSaveSettings = async () => {
     try {
-      await axios.patch('http://localhost:5000/api/org', { name: orgName }, {
+      await api.patch('/api/org', { name: orgName }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Settings saved successfully');
@@ -103,12 +103,14 @@ const AdminConsole: React.FC = () => {
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // In a real app, this would send an email. For now, we'll just create the user.
-      await axios.post('http://localhost:5000/api/auth/register', {
+      // Invite user to organization via dedicated route
+      await api.post('/api/org/users', {
         email: inviteEmail,
         name: inviteName,
         password: 'password123', // Temporary password
-        organizationName: orgName
+        role: inviteRole
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       setIsInviting(false);
       setInviteEmail('');
@@ -122,7 +124,7 @@ const AdminConsole: React.FC = () => {
   const handleCreateDept = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/org/departments', { name: newDeptName }, {
+      await api.post('/api/org/departments', { name: newDeptName }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setNewDeptName('');

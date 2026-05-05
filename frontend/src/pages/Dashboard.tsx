@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import { 
   Search, 
@@ -60,7 +60,7 @@ const Dashboard: React.FC = () => {
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:5000/api/vault', {
+      const response = await api.get('/api/vault', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setItems(response.data);
@@ -85,7 +85,7 @@ const Dashboard: React.FC = () => {
 
   const verifyAndReveal = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/verify-master', {
+      const response = await api.post('/api/auth/verify-master', {
         userId: user?.id,
         password: masterPasswordInput
       });
@@ -94,7 +94,7 @@ const Dashboard: React.FC = () => {
         setShowPassword(true);
         setIsVerifyingMaster(false);
         // Log the reveal
-        await axios.post('http://localhost:5000/api/logs', {
+        await api.post('/api/logs', {
            action: 'REVEAL',
            itemId: selectedItem?.id,
            details: `Password revealed for ${selectedItem?.name}`
@@ -119,7 +119,7 @@ const Dashboard: React.FC = () => {
       const encryptedPassword = encrypt(newPassword, masterPassword);
       const encryptedNotes = encrypt(newNotes, masterPassword);
 
-      await axios.post('http://localhost:5000/api/vault', {
+      await api.post('/api/vault', {
         name: newName,
         username: newUsername,
         password: encryptedPassword,

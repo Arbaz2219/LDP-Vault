@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import bcrypt from 'bcryptjs';
 import { prisma } from '../index';
 import { authenticateJWT, AuthRequest } from '../middleware/auth';
 
@@ -93,6 +94,35 @@ router.get('/users', authenticateJWT, isAdmin, async (req: AuthRequest, res) => 
       select: { id: true, name: true, email: true, role: true, createdAt: true }
     });
     res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Create user in organization (Admin only)
+router.post('/users', authenticateJWT, isAdmin, async (req: AuthRequest, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+    const adminUser = await prisma.user.findUnique({ where: { id: req.user?.userId } });
+    
+    if (!adminUser?.organizationId) return res.status(400).json({ error: 'Admin not in organization' });
+
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) return res.status(400).json({ error: 'User already exists' });
+
+    const hashedPassword = await bcrypt.hash(password || 'password123', 10);
+
+    const newUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        masterPasswordHash: hashedPassword,
+        role: role || 'USER',
+        organizationId: adminUser.organizationId
+      }
+    });
+
+    res.status(201).json(newUser);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }

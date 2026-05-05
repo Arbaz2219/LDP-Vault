@@ -23,11 +23,12 @@ router.post('/register', async (req, res) => {
     const masterPasswordHash = await bcrypt.hash(password, 10);
 
     let organizationId = null;
+    let isNewOrg = false;
     if (organizationName) {
-      // Check if org exists or create it (For LDP Logistics internal use, we might pre-seed this)
       let org = await prisma.organization.findFirst({ where: { name: organizationName } });
       if (!org) {
         org = await prisma.organization.create({ data: { name: organizationName } });
+        isNewOrg = true;
       }
       organizationId = org.id;
     }
@@ -38,7 +39,7 @@ router.post('/register', async (req, res) => {
         masterPasswordHash,
         name,
         organizationId,
-        role: organizationName ? 'ADMIN' : 'USER' // First user of an org is admin
+        role: isNewOrg ? 'ADMIN' : 'USER'
       },
     });
 
