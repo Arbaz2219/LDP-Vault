@@ -84,4 +84,35 @@ router.post('/departments/:deptId/users', authenticateJWT, isAdmin, async (req: 
   }
 });
 
+// Get all users in organization (Admin only)
+router.get('/users', authenticateJWT, isAdmin, async (req: AuthRequest, res) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.user?.userId } });
+    const users = await prisma.user.findMany({
+      where: { organizationId: user?.organizationId },
+      select: { id: true, name: true, email: true, role: true, createdAt: true }
+    });
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update organization settings (Admin only)
+router.patch('/', authenticateJWT, isAdmin, async (req: AuthRequest, res) => {
+  try {
+    const { name } = req.body;
+    const user = await prisma.user.findUnique({ where: { id: req.user?.userId } });
+    if (!user?.organizationId) return res.status(404).json({ error: 'Organization not found' });
+
+    const updatedOrg = await prisma.organization.update({
+      where: { id: user.organizationId },
+      data: { name }
+    });
+    res.json(updatedOrg);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

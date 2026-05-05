@@ -40,30 +40,78 @@ const AdminConsole: React.FC = () => {
   const { token } = useAuth();
   const [activeTab, setActiveTab] = useState<'collections' | 'members' | 'groups' | 'settings'>('collections');
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
   const [newDeptName, setNewDeptName] = useState('');
-  
-  // Simulated members for the mockup
-  const [members] = useState<Member[]>([
-    { id: '1', name: 'Super Admin', email: 'help-desk@ldplogistics.com', role: 'Admin', status: 'Active' },
-    { id: '2', name: 'Arbaz Khan', email: 'arbaz@ldplogistics.com', role: 'User', status: 'Active' },
-  ]);
+  const [orgName, setOrgName] = useState('LDP Logistics, Inc');
+  const [isInviting, setIsInviting] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteName, setInviteName] = useState('');
+  const [inviteRole, setInviteRole] = useState('USER');
 
-  const fetchDepartments = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/org/departments', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setDepartments(response.data);
-    } catch (err) {
-      console.error('Failed to fetch departments');
     } finally {
       // Done
     }
   };
 
+  const fetchMembers = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/org/users', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setMembers(response.data);
+    } catch (err) {
+      console.error('Failed to fetch members');
+    }
+  };
+
+  const fetchOrgDetails = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/org', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.data) setOrgName(response.data.name);
+    } catch (err) {
+      console.error('Failed to fetch org details');
+    }
+  };
+
   useEffect(() => {
-    fetchDepartments();
+    if (token) {
+      fetchDepartments();
+      fetchMembers();
+      fetchOrgDetails();
+    }
   }, [token]);
+
+  const handleSaveSettings = async () => {
+    try {
+      await axios.patch('http://localhost:5000/api/org', { name: orgName }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert('Settings saved successfully');
+    } catch (err) {
+      alert('Failed to save settings');
+    }
+  };
+
+  const handleInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // In a real app, this would send an email. For now, we'll just create the user.
+      await axios.post('http://localhost:5000/api/auth/register', {
+        email: inviteEmail,
+        name: inviteName,
+        password: 'password123', // Temporary password
+        organizationName: orgName
+      });
+      setIsInviting(false);
+      setInviteEmail('');
+      setInviteName('');
+      fetchMembers();
+    } catch (err) {
+      alert('Failed to invite user');
+    }
+  };
 
   const handleCreateDept = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -238,7 +286,10 @@ const AdminConsole: React.FC = () => {
                   <>
                     <div className="flex justify-between items-center mb-6">
                        <p className="text-sm text-gray-500">Manage users who have access to this organization.</p>
-                       <button className="bg-[#175ddc] text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2">
+                       <button 
+                         onClick={() => setIsInviting(true)}
+                         className="bg-[#175ddc] text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2"
+                       >
                          <UserPlus size={16} /> Invite Member
                        </button>
                     </div>
@@ -271,11 +322,16 @@ const AdminConsole: React.FC = () => {
                         <div className="space-y-4">
                            <div>
                               <label className="text-xs font-bold text-gray-500 uppercase">Organization Name</label>
-                              <input type="text" className="input-field mt-1" defaultValue="LDP Logistics, Inc" />
+                              <input 
+                                type="text" 
+                                className="input-field mt-1" 
+                                value={orgName} 
+                                onChange={e => setOrgName(e.target.value)}
+                              />
                            </div>
                            <div>
                               <label className="text-xs font-bold text-gray-500 uppercase">Billing Email</label>
-                              <input type="email" className="input-field mt-1" defaultValue="help-desk@ldplogistics.com" />
+                              <input type="email" className="input-field mt-1" defaultValue="help-desk@ldplogistics.com" disabled />
                            </div>
                         </div>
                      </div>
@@ -304,7 +360,10 @@ const AdminConsole: React.FC = () => {
                         </div>
                      </div>
                      
-                     <button className="bg-[#175ddc] text-white px-6 py-2 rounded font-bold hover:bg-[#134db8]">
+                     <button 
+                       onClick={handleSaveSettings}
+                       className="bg-[#175ddc] text-white px-6 py-2 rounded font-bold hover:bg-[#134db8]"
+                     >
                         Save Settings
                      </button>
                   </div>
@@ -318,6 +377,65 @@ const AdminConsole: React.FC = () => {
           </div>
         </div>
       </div>
+      {/* Invite Member Modal */}
+      {isInviting && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] backdrop-blur-sm">
+           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
+              <div className="flex items-center gap-3 mb-6">
+                 <UserPlus className="text-[#175ddc]" size={24} />
+                 <h2 className="text-xl font-bold text-gray-800">Invite New Member</h2>
+              </div>
+              <form onSubmit={handleInvite} className="space-y-4">
+                 <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase">Name</label>
+                    <input 
+                      type="text" 
+                      className="input-field mt-1" 
+                      value={inviteName}
+                      onChange={e => setInviteName(e.target.value)}
+                      required
+                    />
+                 </div>
+                 <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase">Email</label>
+                    <input 
+                      type="email" 
+                      className="input-field mt-1" 
+                      value={inviteEmail}
+                      onChange={e => setInviteEmail(e.target.value)}
+                      required
+                    />
+                 </div>
+                 <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase">Role</label>
+                    <select 
+                      className="input-field mt-1"
+                      value={inviteRole}
+                      onChange={e => setInviteRole(e.target.value)}
+                    >
+                       <option value="USER">User</option>
+                       <option value="ADMIN">Admin</option>
+                    </select>
+                 </div>
+                 <div className="flex gap-3 mt-8">
+                    <button 
+                      type="button"
+                      onClick={() => setIsInviting(false)}
+                      className="flex-1 px-4 py-2 text-gray-600 font-bold hover:bg-gray-50 rounded"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="submit"
+                      className="flex-1 bg-[#175ddc] text-white font-bold py-2 rounded hover:bg-[#134db8]"
+                    >
+                      Send Invite
+                    </button>
+                 </div>
+              </form>
+           </div>
+        </div>
+      )}
     </div>
   );
 };
