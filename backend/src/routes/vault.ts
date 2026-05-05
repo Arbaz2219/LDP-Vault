@@ -82,10 +82,21 @@ router.get('/match', authenticateJWT, async (req: AuthRequest, res) => {
     const userId = req.user?.userId;
     const { domain } = req.query;
 
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { departments: { select: { departmentId: true } } }
+    });
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const departmentIds = user.departments.map(d => d.departmentId);
+
     const items = await prisma.vaultItem.findMany({
       where: {
-        userId,
-        domain: domain as string
+        domain: domain as string,
+        OR: [
+          { userId },
+          { departmentId: { in: departmentIds } }
+        ]
       }
     });
 

@@ -48,8 +48,14 @@ const AdminConsole: React.FC = () => {
   const [inviteName, setInviteName] = useState('');
   const [inviteRole, setInviteRole] = useState('USER');
 
-    } finally {
-      // Done
+  const fetchDepartments = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/org/departments', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDepartments(response.data);
+    } catch (err) {
+      console.error('Failed to fetch departments');
     }
   };
 
