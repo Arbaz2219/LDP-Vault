@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api, { API_URL } from '../api';
+import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import { 
   Users, 
