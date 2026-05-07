@@ -16,15 +16,11 @@ cd Bit-looker
 ```
 
 ### Configure Environment Variables
-Create a `.env` file in the `backend` folder:
-```bash
-nano backend/.env
-```
-Add the following:
+Create a `.env` file in the root folder:
 ```env
-DATABASE_URL="postgresql://postgres:password@db:5432/ldp_bitwarden"
-JWT_SECRET="generate-a-strong-secret-key"
-PORT=5000
+JWT_SECRET="your-super-secret-key"
+FRONTEND_DOMAIN="vault.yourdomain.com"
+API_DOMAIN="api-vault.yourdomain.com"
 ```
 
 ## 3. Launch the Application
@@ -32,6 +28,7 @@ Run the following command to build and start all services:
 ```bash
 docker-compose up -d --build
 ```
+Traefik will automatically detect the labels and provision SSL certificates via Let's Encrypt.
 
 ## 4. Initialize the Database
 Once the containers are running, you need to run migrations and seed the super admin:
