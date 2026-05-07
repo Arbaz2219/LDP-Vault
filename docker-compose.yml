@@ -27,11 +27,11 @@ services:
       - traefik_public
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ldp_backend.rule=Host(`${API_DOMAIN}`)"
-      - "traefik.http.routers.ldp_backend.entrypoints=websecure"
-      - "traefik.http.routers.ldp_backend.tls=true"
-      - "traefik.http.routers.ldp_backend.tls.certresolver=myresolver"
-      - "traefik.http.services.ldp_backend.loadbalancer.server.port=5000"
+      - "traefik.http.routers.bitlooker_backend.rule=Host(`${API_DOMAIN}`)"
+      - "traefik.http.routers.bitlooker_backend.entrypoints=websecure"
+      - "traefik.http.routers.bitlooker_backend.tls=true"
+      - "traefik.http.routers.bitlooker_backend.tls.certresolver=myresolver"
+      - "traefik.http.services.bitlooker_backend.loadbalancer.server.port=5000"
     restart: unless-stopped
 
   frontend:
@@ -44,11 +44,11 @@ services:
       - traefik_public
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ldp_frontend.rule=Host(`${FRONTEND_DOMAIN}`)"
-      - "traefik.http.routers.ldp_frontend.entrypoints=websecure"
-      - "traefik.http.routers.ldp_frontend.tls=true"
-      - "traefik.http.routers.ldp_frontend.tls.certresolver=myresolver"
-      - "traefik.http.services.ldp_frontend.loadbalancer.server.port=80"
+      - "traefik.http.routers.bitlooker_frontend.rule=Host(`${FRONTEND_DOMAIN}`)"
+      - "traefik.http.routers.bitlooker_frontend.entrypoints=websecure"
+      - "traefik.http.routers.bitlooker_frontend.tls=true"
+      - "traefik.http.routers.bitlooker_frontend.tls.certresolver=myresolver"
+      - "traefik.http.services.bitlooker_frontend.loadbalancer.server.port=80"
     restart: unless-stopped
 
 volumes:
