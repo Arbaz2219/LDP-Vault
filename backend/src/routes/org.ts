@@ -74,7 +74,7 @@ router.post('/departments/:deptId/users', authenticateJWT, isAdmin, async (req: 
 
     const deptUser = await prisma.departmentUser.create({
       data: {
-        departmentId: deptId,
+        departmentId: deptId as string,
         userId,
         permission: permission || 'READ'
       }

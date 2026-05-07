@@ -113,7 +113,7 @@ router.put('/:id', authenticateJWT, async (req: AuthRequest, res) => {
     const { name, username, password, url, notes } = req.body;
 
     const vaultItem = await prisma.vaultItem.update({
-      where: { id },
+      where: { id: id as string },
       data: { name, username, password, url, notes }
     });
 
@@ -127,7 +127,7 @@ router.put('/:id', authenticateJWT, async (req: AuthRequest, res) => {
 router.delete('/:id', authenticateJWT, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    await prisma.vaultItem.delete({ where: { id } });
+    await prisma.vaultItem.delete({ where: { id: id as string } });
     res.status(204).send();
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
