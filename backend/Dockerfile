@@ -13,6 +13,8 @@ RUN npm run build
 # Production stage
 FROM node:20-alpine
 
+RUN apk add --no-cache openssl libc6-compat
+
 WORKDIR /app
 
 COPY --from=build-stage /app/package*.json ./
