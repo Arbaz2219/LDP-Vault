@@ -9,8 +9,7 @@ import {
   Settings, 
   LayoutDashboard, 
   LogOut,
-  Lock,
-  ChevronDown
+  Lock
 } from 'lucide-react';
 import LDPLogo from './LDPLogo';
 
@@ -44,21 +43,29 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </Link>
           <Link
             to="/send"
-            className="flex items-center gap-3 px-3 py-2 rounded hover:bg-[#134db8] transition-colors"
+            className={`flex items-center gap-3 px-3 py-2 rounded transition-colors ${
+              location.pathname === '/send' ? 'bg-[#0047AB]' : 'hover:bg-[#134db8]'
+            }`}
           >
             <Send size={18} />
             <span className="text-sm font-medium">Send</span>
           </Link>
-          <div className="flex items-center justify-between px-3 py-2 rounded hover:bg-[#134db8] transition-colors cursor-pointer">
+          <Link
+            to="/tools"
+            className={`flex items-center justify-between px-3 py-2 rounded transition-colors ${
+              location.pathname === '/tools' ? 'bg-[#0047AB]' : 'hover:bg-[#134db8]'
+            }`}
+          >
             <div className="flex items-center gap-3">
               <Wrench size={18} />
               <span className="text-sm font-medium">Tools</span>
             </div>
-            <ChevronDown size={14} />
-          </div>
+          </Link>
           <Link
             to="/reports"
-            className="flex items-center gap-3 px-3 py-2 rounded hover:bg-[#134db8] transition-colors"
+            className={`flex items-center gap-3 px-3 py-2 rounded transition-colors ${
+              location.pathname === '/reports' ? 'bg-[#0047AB]' : 'hover:bg-[#134db8]'
+            }`}
           >
             <BarChart2 size={18} />
             <span className="text-sm font-medium">Reports</span>

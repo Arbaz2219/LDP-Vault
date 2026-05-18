@@ -43,7 +43,12 @@ router.get('/', authenticateJWT, async (req: AuthRequest, res) => {
 router.post('/', authenticateJWT, async (req: AuthRequest, res) => {
   try {
     const userId = req.user?.userId;
-    const { name, username, password, url, notes, departmentId, isHidden } = req.body;
+    const { 
+      name, username, password, url, notes, departmentId, isHidden,
+      type, isFavorite, folderId, collectionId,
+      cardholderName, cardNumber, expirationMonth, expirationYear, cvv,
+      firstName, lastName, address, phone, licenseNumber
+    } = req.body;
 
     if (!name) return res.status(400).json({ error: 'Name is required' });
 
@@ -65,6 +70,20 @@ router.post('/', authenticateJWT, async (req: AuthRequest, res) => {
         domain,
         notes,
         isHidden: isHidden || false,
+        type: type || 'login',
+        isFavorite: isFavorite || false,
+        folderId: folderId || undefined,
+        collectionId: collectionId || undefined,
+        cardholderName,
+        cardNumber,
+        expirationMonth,
+        expirationYear,
+        cvv,
+        firstName,
+        lastName,
+        address,
+        phone,
+        licenseNumber,
         userId: departmentId ? undefined : userId,
         departmentId: departmentId || undefined
       }
@@ -72,6 +91,7 @@ router.post('/', authenticateJWT, async (req: AuthRequest, res) => {
 
     res.status(201).json(vaultItem);
   } catch (error) {
+    console.error('Failed to create vault item:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -110,15 +130,52 @@ router.get('/match', authenticateJWT, async (req: AuthRequest, res) => {
 router.put('/:id', authenticateJWT, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const { name, username, password, url, notes } = req.body;
+    const { 
+      name, username, password, url, notes, isHidden,
+      type, isFavorite, folderId, collectionId,
+      cardholderName, cardNumber, expirationMonth, expirationYear, cvv,
+      firstName, lastName, address, phone, licenseNumber
+    } = req.body;
+
+    let domain = null;
+    if (url) {
+      try {
+        domain = new URL(url).hostname;
+      } catch (e) {
+        domain = url;
+      }
+    }
 
     const vaultItem = await prisma.vaultItem.update({
       where: { id: id as string },
-      data: { name, username, password, url, notes }
+      data: { 
+        name, 
+        username, 
+        password, 
+        url, 
+        domain,
+        notes, 
+        isHidden: isHidden !== undefined ? isHidden : undefined,
+        type: type !== undefined ? type : undefined,
+        isFavorite: isFavorite !== undefined ? isFavorite : undefined,
+        folderId: folderId === null ? null : (folderId || undefined),
+        collectionId: collectionId === null ? null : (collectionId || undefined),
+        cardholderName,
+        cardNumber,
+        expirationMonth,
+        expirationYear,
+        cvv,
+        firstName,
+        lastName,
+        address,
+        phone,
+        licenseNumber
+      }
     });
 
     res.json(vaultItem);
   } catch (error) {
+    console.error('Failed to update vault item:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

@@ -5,6 +5,9 @@ import Login from './pages/Login';
 import VaultLock from './pages/VaultLock';
 import Dashboard from './pages/Dashboard';
 import AdminConsole from './pages/AdminConsole';
+import Send from './pages/Send';
+import Tools from './pages/Tools';
+import Reports from './pages/Reports';
 import Layout from './components/Layout';
 
 const AppContent: React.FC = () => {
@@ -28,6 +31,9 @@ const AppContent: React.FC = () => {
       <Routes>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/admin" element={<AdminConsole />} />
+        <Route path="/send" element={<Send />} />
+        <Route path="/tools" element={<Tools />} />
+        <Route path="/reports" element={<Reports />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Layout>

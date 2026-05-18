@@ -7,6 +7,8 @@ import authRoutes from './routes/auth';
 import vaultRoutes from './routes/vault';
 import orgRoutes from './routes/org';
 import logRoutes from './routes/logs';
+import folderRoutes from './routes/folder';
+import collectionRoutes from './routes/collection';
 
 dotenv.config();
 
@@ -22,6 +24,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/vault', vaultRoutes);
 app.use('/api/org', orgRoutes);
 app.use('/api/logs', logRoutes);
+app.use('/api/folder', folderRoutes);
+app.use('/api/collection', collectionRoutes);
 
 // Basic health check
 app.get('/health', (req, res) => {

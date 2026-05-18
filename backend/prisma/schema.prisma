@@ -38,6 +38,8 @@ model User {
   organization       Organization?    @relation(fields: [organizationId], references: [id])
   departments        DepartmentUser[]
   personalVaultItems VaultItem[]
+  folders            Folder[]
+  collections        Collection[]
   auditLogs          AuditLog[]
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
@@ -56,10 +58,24 @@ model DepartmentUser {
   @@unique([userId, departmentId])
 }
 
+model Folder {
+  id         String      @id @default(uuid())
+  name       String
+  userId     String
+  user       User        @relation(fields: [userId], references: [id])
+  vaultItems VaultItem[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
 model Collection {
   id         String      @id @default(uuid())
   name       String
+  userId     String
+  user       User        @relation(fields: [userId], references: [id])
   vaultItems VaultItem[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 }
 
 model VaultItem {
@@ -72,12 +88,33 @@ model VaultItem {
   notes        String? // Encrypted
   isHidden     Boolean     @default(false)
   
+  // Custom metadata for item types & styling
+  type         String      @default("login") // "login", "card", "identity", "note", "ssh"
+  isFavorite   Boolean     @default(false)
+  
+  // Card-specific fields (encrypted or plain string placeholders)
+  cardholderName String?
+  cardNumber     String?
+  expirationMonth String?
+  expirationYear  String?
+  cvv            String?
+  
+  // Identity-specific fields
+  firstName      String?
+  lastName       String?
+  address        String?
+  phone          String?
+  licenseNumber  String?
+
   // Can belong to a user (personal) OR a department (organization)
   userId       String?
   user         User?       @relation(fields: [userId], references: [id])
   
   departmentId String?
   department   Department? @relation(fields: [departmentId], references: [id])
+
+  folderId     String?
+  folder       Folder?     @relation(fields: [folderId], references: [id])
 
   collectionId String?
   collection   Collection? @relation(fields: [collectionId], references: [id])
