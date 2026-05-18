@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, Server } from 'lucide-react';
 import LDPLogo from '../components/LDPLogo';
 
 const Login: React.FC = () => {
@@ -22,45 +22,76 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc] flex flex-col font-sans">
-      {/* Top Left Logo */}
-      <div className="p-6">
-        <div className="flex items-center gap-2 text-[#175ddc]">
-          <LDPLogo className="w-8 h-8" />
-          <span className="text-2xl font-bold tracking-tight">ldplogistics</span>
-        </div>
+    <div className="min-h-screen bg-[#070b19] flex items-center justify-center relative overflow-hidden font-sans">
+      {/* Dynamic Background Gradients & Mesh */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-tr from-[#175ddc]/30 to-purple-600/20 blur-[120px] animate-pulse duration-10000" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-blue-600/20 to-teal-500/25 blur-[120px] animate-pulse duration-[8000ms]" />
+        
+        {/* Subtle grid pattern overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:4rem_4rem]" />
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center -mt-20 px-4">
-        <div className="mb-10 text-center">
-          <h1 className="text-3xl font-bold text-[#172b4d]">Log in</h1>
-        </div>
+      {/* Main glassmorphic container */}
+      <div className="w-full max-w-[480px] p-6 z-10">
+        <div className="backdrop-blur-xl bg-white/[0.03] border border-white/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.4)] rounded-2xl p-8 md:p-10 w-full relative overflow-hidden">
+          
+          {/* Subtle top edge highlighting glow */}
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#175ddc]/60 to-transparent" />
 
-        <div className="bg-white p-10 rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-[#e2e8f0] w-full max-w-[448px]">
-          {error && <div className="bg-red-50 text-red-600 p-3 rounded mb-6 text-xs text-center border border-red-100">{error}</div>}
+          {/* Logo & Header */}
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.1] flex items-center justify-center mb-4 shadow-[0_8px_16px_rgba(0,0,0,0.2)]">
+              <LDPLogo className="w-9 h-9" />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight text-center">
+              Bitlooker <span className="text-[#175ddc]">Vault</span>
+            </h1>
+            <p className="text-xs text-gray-400 mt-2 font-medium tracking-wide uppercase">
+              LDP Logistics Security Portal
+            </p>
+          </div>
+
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-200 text-xs py-3 px-4 rounded-lg mb-6 text-center shadow-inner">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="relative group">
-              <label className="absolute -top-2.5 left-3 bg-white px-1 text-[11px] font-semibold text-[#677489] group-focus-within:text-[#175ddc] z-10 transition-colors">
-                Email address <span className="text-gray-400 font-normal">(required)</span>
+            {/* Email Field */}
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
+                Email Address
               </label>
-              <input
-                type="email"
-                className="w-full px-3 py-2.5 border border-[#ced4da] rounded focus:outline-none focus:border-[#175ddc] focus:ring-1 focus:ring-[#175ddc] text-gray-900 text-sm transition-all"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              <div className="relative group">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#175ddc] transition-colors">
+                  <Mail size={18} />
+                </div>
+                <input
+                  type="email"
+                  className="w-full pl-11 pr-4 py-3 bg-white/[0.02] border border-white/[0.1] rounded-xl focus:outline-none focus:border-[#175ddc] focus:ring-1 focus:ring-[#175ddc] text-white text-sm transition-all placeholder-gray-500 shadow-inner"
+                  placeholder="name@ldplogistics.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
             </div>
 
-            <div className="relative group">
-              <label className="absolute -top-2.5 left-3 bg-white px-1 text-[11px] font-semibold text-[#677489] group-focus-within:text-[#175ddc] z-10 transition-colors">
-                Master password <span className="text-gray-400 font-normal">(required)</span>
+            {/* Password Field */}
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
+                Master Password
               </label>
-              <div className="relative">
+              <div className="relative group">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#175ddc] transition-colors">
+                  <Lock size={18} />
+                </div>
                 <input
                   type={showPassword ? "text" : "password"}
-                  className="w-full px-3 py-2.5 border border-[#ced4da] rounded focus:outline-none focus:border-[#175ddc] focus:ring-1 focus:ring-[#175ddc] text-gray-900 text-sm transition-all"
+                  className="w-full pl-11 pr-12 py-3 bg-white/[0.02] border border-white/[0.1] rounded-xl focus:outline-none focus:border-[#175ddc] focus:ring-1 focus:ring-[#175ddc] text-white text-sm transition-all placeholder-gray-500 shadow-inner"
+                  placeholder="••••••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -68,22 +99,32 @@ const Login: React.FC = () => {
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#677489] hover:text-[#172b4d]"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
-            <button type="submit" className="w-full py-2.5 bg-[#175ddc] hover:bg-[#134db8] text-white font-bold rounded transition-colors text-sm tracking-wide uppercase">
-              LOG IN
+            {/* Login Button */}
+            <button 
+              type="submit" 
+              className="w-full py-3.5 bg-gradient-to-r from-[#175ddc] to-[#124cb4] hover:from-[#1b6aff] hover:to-[#175ddc] text-white font-bold rounded-xl transition-all duration-300 text-sm tracking-wider uppercase shadow-[0_4px_12px_rgba(23,93,220,0.3)] hover:shadow-[0_6px_20px_rgba(23,93,220,0.5)] active:scale-[0.98]"
+            >
+              Sign In to Vault
             </button>
           </form>
         </div>
 
-        <div className="mt-12 text-center text-[11px] text-[#677489] leading-relaxed">
-          <p className="hover:underline cursor-pointer">Accessing ldplogistics.com</p>
-          <p>© 2026 LDP Logistics Inc.</p>
+        {/* Footer */}
+        <div className="mt-8 flex flex-col items-center gap-2 text-center">
+          <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
+            <Server size={14} className="text-[#175ddc]" />
+            <span>Secure Connection: bitlooker.ldplogistics.com</span>
+          </div>
+          <p className="text-[10px] text-gray-500">
+            © 2026 LDP Logistics Inc. All rights reserved.
+          </p>
         </div>
       </div>
     </div>
