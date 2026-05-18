@@ -47,9 +47,9 @@ const Login: React.FC = () => {
       
       {/* Top Left Brand Header */}
       <header className="p-6 z-10">
-        <div className="flex items-center gap-2 text-[#175ddc] hover:opacity-90 transition-opacity cursor-pointer">
+        <div className="flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer">
           <LDPLogo className="w-8 h-8" />
-          <span className="text-2xl font-bold tracking-tight text-[#175ddc]">bitlooker</span>
+          <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-[#a855f7] to-[#3b82f6] bg-clip-text text-transparent">bitlooker</span>
         </div>
       </header>
 
@@ -62,7 +62,7 @@ const Login: React.FC = () => {
             {/* Padlock shackle */}
             <path 
               d="M32 42V28C32 17.5 40.5 9.5 50 9.5C59.5 9.5 68 17.5 68 28V42" 
-              stroke="#175ddc" 
+              stroke="url(#padlock-shackle-grad)" 
               strokeWidth="4.5" 
               strokeLinecap="round"
             />
@@ -104,6 +104,13 @@ const Login: React.FC = () => {
             {/* Base shackle support */}
             <rect x="29" y="38" width="6" height="5" rx="1" fill="#1d2736" />
             <rect x="65" y="38" width="6" height="5" rx="1" fill="#1d2736" />
+            
+            <defs>
+              <linearGradient id="padlock-shackle-grad" x1="32" y1="9.5" x2="68" y2="42" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#a855f7" />
+                <stop offset="100%" stopColor="#3b82f6" />
+              </linearGradient>
+            </defs>
           </svg>
         </div>
 
@@ -131,12 +138,12 @@ const Login: React.FC = () => {
             {/* Email Address Field (Only visible when NOT locked) */}
             {!isLocked && (
               <div className="relative group">
-                <label className="absolute -top-2.5 left-3 bg-white px-1 text-[11px] font-bold text-[#6b778c] group-focus-within:text-[#175ddc] z-10 transition-colors">
+                <label className="absolute -top-2.5 left-3 bg-white px-1 text-[11px] font-bold text-[#6b778c] group-focus-within:text-[#a855f7] z-10 transition-colors">
                   Email address <span className="text-[#a5adba] font-normal">(required)</span>
                 </label>
                 <input
                   type="email"
-                  className="w-full px-3.5 py-3 border border-[#ced4da] rounded-lg focus:outline-none focus:border-[#175ddc] focus:ring-1 focus:ring-[#175ddc] text-gray-900 text-sm transition-all"
+                  className="w-full px-3.5 py-3 border border-[#ced4da] rounded-lg focus:outline-none focus:border-[#a855f7] focus:ring-1 focus:ring-[#a855f7] text-gray-900 text-sm transition-all"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -146,13 +153,13 @@ const Login: React.FC = () => {
 
             {/* Master Password Field */}
             <div className="relative group">
-              <label className="absolute -top-2.5 left-3 bg-white px-1 text-[11px] font-bold text-[#6b778c] group-focus-within:text-[#175ddc] z-10 transition-colors">
+              <label className="absolute -top-2.5 left-3 bg-white px-1 text-[11px] font-bold text-[#6b778c] group-focus-within:text-[#a855f7] z-10 transition-colors">
                 Master password <span className="text-[#a5adba] font-normal">(required)</span>
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  className="w-full pl-3.5 pr-12 py-3 border border-[#ced4da] rounded-lg focus:outline-none focus:border-[#175ddc] focus:ring-1 focus:ring-[#175ddc] text-gray-900 text-sm transition-all"
+                  className="w-full pl-3.5 pr-12 py-3 border border-[#ced4da] rounded-lg focus:outline-none focus:border-[#a855f7] focus:ring-1 focus:ring-[#a855f7] text-gray-900 text-sm transition-all"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -160,7 +167,7 @@ const Login: React.FC = () => {
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#6b778c] hover:text-[#172b4d] transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#6b778c] hover:text-[#a855f7] transition-colors"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -170,7 +177,7 @@ const Login: React.FC = () => {
             {/* Submit Button */}
             <button 
               type="submit" 
-              className="w-full py-3 bg-[#175ddc] hover:bg-[#134db8] text-white font-semibold rounded-lg transition-colors text-sm tracking-wide shadow-sm hover:shadow active:scale-[0.99] transform"
+              className="w-full py-3 bg-gradient-to-r from-[#a855f7] to-[#3b82f6] hover:from-[#b55fe6] hover:to-[#4f92ff] text-white font-semibold rounded-lg transition-colors text-sm tracking-wide shadow-sm hover:shadow active:scale-[0.99] transform"
             >
               {isLocked ? 'Unlock' : 'Log In'}
             </button>
