@@ -12,6 +12,9 @@ RUN npm run build
 # Production stage
 FROM nginx:stable-alpine as production-stage
 
+# Remove default nginx configs to prevent overrides
+RUN rm -rf /etc/nginx/conf.d/*
+
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
