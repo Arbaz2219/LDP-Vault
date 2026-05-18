@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
-import BitwardenLockIcon from '../components/LockIcon';
 import LDPLogo from '../components/LDPLogo';
 
 const VaultLock: React.FC = () => {
@@ -19,34 +18,106 @@ const VaultLock: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc] flex flex-col font-sans">
-      {/* Top Left Logo */}
-      <div className="p-6">
-        <div className="flex items-center gap-2 text-[#175ddc]">
+    <div className="min-h-screen bg-[#f8f9fc] flex flex-col justify-between font-sans relative overflow-hidden select-none">
+      
+      {/* Top Left Brand Header */}
+      <header className="p-6 z-10">
+        <div className="flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer">
           <LDPLogo className="w-8 h-8" />
-          <span className="text-2xl font-bold tracking-tight">ldplogistics</span>
+          <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-[#a855f7] to-[#3b82f6] bg-clip-text text-transparent">bitlooker</span>
         </div>
-      </div>
+      </header>
 
-      <div className="flex-1 flex flex-col items-center justify-center -mt-20 px-4">
-        {/* Center Lock Icon */}
-        <div className="mb-2 flex flex-col items-center">
-          <BitwardenLockIcon />
-          <h1 className="text-2xl font-bold text-[#172b4d] mt-2">Your vault is locked</h1>
-          <p className="text-sm text-[#677489] mt-2">{user?.email}</p>
+      {/* Center Main Content Container */}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 z-10">
+        
+        {/* Animated Locked Padlock SVG Illustration */}
+        <div className="mb-6 flex flex-col items-center">
+          <svg className="w-24 h-24 drop-shadow-[0_4px_6px_rgba(0,0,0,0.05)]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Padlock shackle */}
+            <path 
+              d="M32 42V28C32 17.5 40.5 9.5 50 9.5C59.5 9.5 68 17.5 68 28V42" 
+              stroke="url(#vault-shackle-grad)" 
+              strokeWidth="4.5" 
+              strokeLinecap="round"
+            />
+            {/* Padlock body */}
+            <rect 
+              x="20" 
+              y="40" 
+              width="60" 
+              height="46" 
+              rx="12" 
+              fill="#ffffff" 
+              stroke="#1d2736" 
+              strokeWidth="4"
+            />
+            {/* Padlock inner plate */}
+            <rect 
+              x="28" 
+              y="48" 
+              width="44" 
+              height="20" 
+              rx="6" 
+              fill="#fecb2f" 
+              stroke="#1d2736" 
+              strokeWidth="3.5"
+            />
+            {/* Keyhole or Password Dots representation */}
+            <text 
+              x="50" 
+              y="62" 
+              fontFamily="monospace" 
+              fontSize="16" 
+              fontWeight="900" 
+              fill="#1d2736" 
+              textAnchor="middle" 
+              letterSpacing="2"
+            >
+              ***--
+            </text>
+            {/* Base shackle support */}
+            <rect x="29" y="38" width="6" height="5" rx="1" fill="#1d2736" />
+            <rect x="65" y="38" width="6" height="5" rx="1" fill="#1d2736" />
+            
+            <defs>
+              <linearGradient id="vault-shackle-grad" x1="32" y1="9.5" x2="68" y2="42" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#a855f7" />
+                <stop offset="100%" stopColor="#3b82f6" />
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
 
-        {/* Input Card */}
-        <div className="bg-white p-10 rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-[#e2e8f0] w-full max-w-[448px] mt-4">
+        {/* Heading */}
+        <h1 className="text-[28px] font-semibold text-[#172b4d] tracking-tight mb-1 text-center">
+          Your vault is locked
+        </h1>
+
+        {/* Dynamic Subheading */}
+        <p className="text-sm text-[#5e6c84] mb-8 font-medium text-center">
+          {user?.email}
+        </p>
+
+        {/* Unlock Form Card */}
+        <div className="bg-white p-8 rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-[#e2e8f0] w-full max-w-[448px] transition-all">
+          
+          {error && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-6 text-xs text-center border border-red-100 font-medium">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleUnlock} className="space-y-6">
+            {/* Master Password Field */}
             <div className="relative group">
-              <label className="absolute -top-2.5 left-3 bg-white px-1 text-[11px] font-semibold text-[#677489] group-focus-within:text-[#175ddc] z-10 transition-colors">
-                Master password <span className="text-gray-400 font-normal">(required)</span>
+              <label className="absolute -top-2.5 left-3 bg-white px-1 text-[11px] font-bold text-[#6b778c] group-focus-within:text-[#a855f7] z-10 transition-colors">
+                Master password <span className="text-[#a5adba] font-normal">(required)</span>
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  className="w-full px-3 py-2.5 border border-[#ced4da] rounded focus:outline-none focus:border-[#175ddc] focus:ring-1 focus:ring-[#175ddc] text-gray-900 text-sm transition-all"
+                  className="w-full pl-3.5 pr-12 py-3 border border-[#ced4da] rounded-lg focus:outline-none focus:border-[#a855f7] focus:ring-1 focus:ring-[#a855f7] text-gray-900 text-sm transition-all"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoFocus
@@ -55,36 +126,66 @@ const VaultLock: React.FC = () => {
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#677489] hover:text-[#172b4d]"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#6b778c] hover:text-[#a855f7] transition-colors"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
-            {error && <div className="text-red-500 text-xs text-center">{error}</div>}
-
-            <button type="submit" className="w-full py-2.5 bg-[#175ddc] hover:bg-[#134db8] text-white font-bold rounded transition-colors text-sm tracking-wide uppercase">
-              UNLOCK
+            {/* Unlock Button */}
+            <button 
+              type="submit" 
+              className="w-full py-3 bg-gradient-to-r from-[#a855f7] to-[#3b82f6] hover:from-[#b55fe6] hover:to-[#4f92ff] text-white font-semibold rounded-lg transition-colors text-sm tracking-wide shadow-sm hover:shadow active:scale-[0.99] transform"
+            >
+              Unlock
             </button>
           </form>
-          
+
+          {/* Action toggle / logout option */}
           <div className="mt-6 flex flex-col items-center">
-            <span className="text-[11px] font-bold text-[#677489] mb-4 uppercase">or</span>
+            <span className="text-xs text-[#8993a4] mb-4">or</span>
             <button 
               onClick={logout}
-              className="w-full py-2.5 bg-[#f0f3f8] hover:bg-[#e4e9f2] text-[#172b4d] font-bold rounded transition-colors text-sm tracking-wide border border-transparent"
+              className="w-full py-3 border border-[#dfe1e6] bg-[#f4f5f7] hover:bg-[#ebecf0] text-[#172b4d] font-semibold rounded-lg transition-colors text-sm tracking-wide"
             >
               Log out
             </button>
           </div>
         </div>
+      </main>
 
-        <div className="mt-12 text-center text-[11px] text-[#677489] leading-relaxed">
-          <p className="hover:underline cursor-pointer">Accessing ldplogistics.com</p>
-          <p>© 2026 LDP Logistics Inc.</p>
-          <p>2026.4.1</p>
-        </div>
+      {/* Footer Branding */}
+      <footer className="py-8 text-center text-[11px] text-[#6b778c] leading-relaxed z-10">
+        <p className="hover:underline cursor-pointer font-medium hover:text-[#175ddc] transition-colors">
+          Accessing bitlooker.com
+        </p>
+        <p className="mt-0.5">© 2026 LDP Logistics Inc.</p>
+      </footer>
+
+      {/* Bottom Left Vector Shapes Decoration */}
+      <div className="absolute bottom-0 left-0 w-80 h-80 text-gray-300/40 pointer-events-none z-0">
+        <svg className="w-full h-full" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="20" y="60" width="100" height="70" rx="6" stroke="currentColor" strokeWidth="2.5"/>
+          <line x1="15" y1="130" x2="125" y2="130" stroke="currentColor" strokeWidth="3"/>
+          <circle cx="70" cy="90" r="14" stroke="currentColor" strokeWidth="2.5"/>
+          <path d="M45 118C45 110 55 106 70 106C85 106 95 110 95 118" stroke="currentColor" strokeWidth="2.5"/>
+          <circle cx="140" cy="150" r="20" stroke="currentColor" strokeWidth="2.5" strokeDasharray="5 4"/>
+        </svg>
+      </div>
+
+      {/* Bottom Right Vector Shapes Decoration */}
+      <div className="absolute bottom-0 right-0 w-80 h-80 text-gray-300/40 pointer-events-none z-0">
+        <svg className="w-full h-full" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="140" cy="140" r="32" stroke="currentColor" strokeWidth="2.5"/>
+          <path d="M128 132L120 140L128 148" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M152 132L160 140L152 148" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M142 128L138 152" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <circle cx="60" cy="150" r="14" stroke="currentColor" strokeWidth="2.5"/>
+          <path d="M74 150H95" stroke="currentColor" strokeWidth="2.5"/>
+          <path d="M88 150V157" stroke="currentColor" strokeWidth="2.5"/>
+          <path d="M93 150V157" stroke="currentColor" strokeWidth="2.5"/>
+        </svg>
       </div>
     </div>
   );
