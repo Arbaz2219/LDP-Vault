@@ -128,6 +128,37 @@ router.post('/users', authenticateJWT, isAdmin, async (req: AuthRequest, res) =>
   }
 });
 
+// Reset user password (Admin only)
+router.post('/users/:userId/reset-password', authenticateJWT, isAdmin, async (req: AuthRequest, res) => {
+  try {
+    const { userId } = req.params;
+    const { newPassword } = req.body;
+    const adminUser = await prisma.user.findUnique({ where: { id: req.user?.userId } });
+    
+    if (!adminUser?.organizationId) return res.status(400).json({ error: 'Admin not in organization' });
+
+    const targetUser = await prisma.user.findUnique({ where: { id: userId } });
+    if (!targetUser || targetUser.organizationId !== adminUser.organizationId) {
+      return res.status(404).json({ error: 'User not found in your organization' });
+    }
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { masterPasswordHash: hashedPassword }
+    });
+
+    res.json({ message: 'Password reset successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Update organization settings (Admin only)
 router.patch('/', authenticateJWT, isAdmin, async (req: AuthRequest, res) => {
   try {

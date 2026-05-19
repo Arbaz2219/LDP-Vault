@@ -47,6 +47,10 @@ const AdminConsole: React.FC = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteName, setInviteName] = useState('');
   const [inviteRole, setInviteRole] = useState('USER');
+  const [invitePassword, setInvitePassword] = useState('');
+  
+  const [resetUserId, setResetUserId] = useState<string | null>(null);
+  const [resetPassword, setResetPassword] = useState('');
 
   const fetchDepartments = async () => {
     try {
@@ -102,12 +106,16 @@ const AdminConsole: React.FC = () => {
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!invitePassword || invitePassword.length < 6) {
+      alert('Password must be at least 6 characters');
+      return;
+    }
     try {
       // Invite user to organization via dedicated route
       await api.post('/api/org/users', {
         email: inviteEmail,
         name: inviteName,
-        password: 'password123', // Temporary password
+        password: invitePassword,
         role: inviteRole
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -115,9 +123,30 @@ const AdminConsole: React.FC = () => {
       setIsInviting(false);
       setInviteEmail('');
       setInviteName('');
+      setInvitePassword('');
       fetchMembers();
     } catch (err) {
       alert('Failed to invite user');
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetPassword || resetPassword.length < 6) {
+      alert('Password must be at least 6 characters');
+      return;
+    }
+    try {
+      await api.post(`/api/org/users/${resetUserId}/reset-password`, {
+        newPassword: resetPassword
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert('Password reset successfully');
+      setResetUserId(null);
+      setResetPassword('');
+    } catch (err) {
+      alert('Failed to reset password');
     }
   };
 
@@ -317,8 +346,16 @@ const AdminConsole: React.FC = () => {
                              {member.role}
                            </span>
                         </div>
-                        <div className="w-10 flex justify-end">
-                          <MoreVertical size={16} className="text-gray-300" />
+                        <div className="w-10 flex justify-end relative group/menu">
+                          <MoreVertical size={16} className="text-gray-300 cursor-pointer" />
+                          <div className="hidden group-hover/menu:block absolute right-0 top-full mt-1 w-36 bg-white border border-gray-100 shadow-lg rounded py-1 z-10">
+                            <button 
+                              onClick={() => setResetUserId(member.id)}
+                              className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50"
+                            >
+                              Reset Password
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -425,6 +462,17 @@ const AdminConsole: React.FC = () => {
                        <option value="ADMIN">Admin</option>
                     </select>
                  </div>
+                 <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase">Initial Password</label>
+                    <input 
+                      type="text" 
+                      className="input-field mt-1" 
+                      value={invitePassword}
+                      onChange={e => setInvitePassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                 </div>
                  <div className="flex gap-3 mt-8">
                     <button 
                       type="button"
@@ -438,6 +486,46 @@ const AdminConsole: React.FC = () => {
                       className="flex-1 bg-[#175ddc] text-white font-bold py-2 rounded hover:bg-[#134db8]"
                     >
                       Send Invite
+                    </button>
+                 </div>
+              </form>
+           </div>
+        </div>
+      )}
+
+      {/* Reset Password Modal */}
+      {resetUserId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] backdrop-blur-sm">
+           <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-8">
+              <div className="flex items-center gap-3 mb-6">
+                 <Shield className="text-[#175ddc]" size={24} />
+                 <h2 className="text-xl font-bold text-gray-800">Reset Password</h2>
+              </div>
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                 <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase">New Password</label>
+                    <input 
+                      type="text" 
+                      className="input-field mt-1" 
+                      value={resetPassword}
+                      onChange={e => setResetPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                 </div>
+                 <div className="flex gap-3 mt-8">
+                    <button 
+                      type="button"
+                      onClick={() => setResetUserId(null)}
+                      className="flex-1 px-4 py-2 text-gray-600 font-bold hover:bg-gray-50 rounded"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="submit"
+                      className="flex-1 bg-[#175ddc] text-white font-bold py-2 rounded hover:bg-[#134db8]"
+                    >
+                      Reset
                     </button>
                  </div>
               </form>

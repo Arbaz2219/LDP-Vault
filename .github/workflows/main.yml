@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-test:
@@ -25,60 +25,58 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Use Node.js 20.x
-      uses: actions/setup-node@v3
-      with:
-        node-version: 20.x
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
 
-    # Backend CI
-    - name: Install Backend Dependencies
-      run: |
-        cd backend
-        npm install
+      # Backend CI
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          npm install
 
-    - name: Run Prisma Generate
-      run: |
-        cd backend
-        npx prisma generate
+      - name: Run Prisma Generate
+        run: |
+          cd backend
+          npx prisma generate
 
-    # Frontend CI
-    - name: Install Frontend Dependencies
-      run: |
-        cd frontend
-        npm install
+      # Frontend CI
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm install
 
-    - name: Build Frontend
-      run: |
-        cd frontend
-        npm run build
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm run build
 
-    # Extension CI
-    - name: Check Extension Manifest
-      run: |
-        if [ ! -f extension/manifest.json ]; then
-          echo "Extension manifest missing!"
-          exit 1
-        fi
+      # Extension CI
+      - name: Check Extension Manifest
+        run: |
+          if [ ! -f extension/manifest.json ]; then
+            echo "Extension manifest missing!"
+            exit 1
+          fi
 
-    # Docker Build (Optional: Only if secrets are set)
-    - name: Build Docker Images
-      run: |
-        docker build -t ldp-backend ./backend
-        docker build -t ldp-frontend ./frontend
+      # Docker Build (Optional: Only if secrets are set)
+      - name: Build Docker Images
+        run: |
+          docker build -t ldp-backend ./backend
+          docker build -t ldp-frontend ./frontend
 
   deploy:
-    needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build-and-test
     steps:
-      - name: Deploy to Server via SSH
-        uses: appleboy/ssh-action@master
+      - name: SSH & deploy
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
-          password: ${{ secrets.SERVER_PASSWORD }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           script: |
