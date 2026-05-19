@@ -148,7 +148,7 @@ const AdminConsole: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between px-8 py-4 border-b border-gray-100">
         <div className="flex items-center gap-2">
-           <LDPLogo className="w-8 h-8" />
+           <LDPLogo className="h-8 w-auto" />
            <h1 className="text-2xl font-medium text-gray-800">LDP Logistics, Inc</h1>
         </div>
         <div className="flex items-center gap-4">

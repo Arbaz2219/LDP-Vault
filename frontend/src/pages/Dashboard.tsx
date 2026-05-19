@@ -615,7 +615,7 @@ const Dashboard: React.FC = () => {
             </div>
           ) : filteredItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-gray-300">
-              <LDPLogo className="mb-6 opacity-20 w-16 h-16 grayscale" />
+              <LDPLogo className="mb-6 opacity-20 h-16 w-auto grayscale" />
               <p className="text-gray-400">Nothing to show here.</p>
             </div>
           ) : (
