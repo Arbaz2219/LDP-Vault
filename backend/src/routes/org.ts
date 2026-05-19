@@ -131,7 +131,7 @@ router.post('/users', authenticateJWT, isAdmin, async (req: AuthRequest, res) =>
 // Reset user password (Admin only)
 router.post('/users/:userId/reset-password', authenticateJWT, isAdmin, async (req: AuthRequest, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.params.userId as string;
     const { newPassword } = req.body;
     const adminUser = await prisma.user.findUnique({ where: { id: req.user?.userId } });
     
