@@ -151,7 +151,7 @@ const VaultLock: React.FC = () => {
       {/* Footer Branding */}
       <footer className="py-8 text-center text-[11px] text-[#6b778c] leading-relaxed z-10">
         <p className="hover:underline cursor-pointer font-medium hover:text-[#175ddc] transition-colors">
-          Accessing ldpvault.com
+          Accessing vault.ldplogistics.com
         </p>
         <p className="mt-0.5">© 2026 LDP Logistics Inc.</p>
       </footer>

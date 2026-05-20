@@ -26,7 +26,7 @@ const Send: React.FC = () => {
       text: 'root:supersecretpassword',
       expiresIn: '1 day',
       createdAt: new Date().toLocaleDateString(),
-      link: 'https://send.ldpvault.com/s/72a1b3'
+      link: 'https://send.vault.ldplogistics.com/s/72a1b3'
     }
   ]);
 
@@ -47,7 +47,7 @@ const Send: React.FC = () => {
       text,
       expiresIn,
       createdAt: new Date().toLocaleDateString(),
-      link: `https://send.ldpvault.com/s/${randomId}`
+      link: `https://send.vault.ldplogistics.com/s/${randomId}`
     };
 
     setSends([newSend, ...sends]);
