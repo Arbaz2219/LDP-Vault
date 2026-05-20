@@ -3,11 +3,11 @@
 services:
   db:
     image: postgres:15-alpine
-    container_name: ldp_bitwarden_db
+    container_name: ldp_vault_db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: ldp_bitwarden
+      POSTGRES_DB: ldp_vault
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -18,9 +18,9 @@ services:
 
   backend:
     build: ./backend
-    container_name: ldp_bitwarden_backend
+    container_name: ldp_vault_backend
     environment:
-      DATABASE_URL: "postgresql://postgres:password@db:5432/ldp_bitwarden"
+      DATABASE_URL: "postgresql://postgres:password@db:5432/ldp_vault"
       JWT_SECRET: "${JWT_SECRET}"
     depends_on:
       - db
@@ -29,16 +29,16 @@ services:
       - traefik_public
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.bitlooker_backend.rule=Host(`${API_DOMAIN}`)"
-      - "traefik.http.routers.bitlooker_backend.entrypoints=websecure"
-      - "traefik.http.routers.bitlooker_backend.tls=true"
-      - "traefik.http.routers.bitlooker_backend.tls.certresolver=myresolver"
-      - "traefik.http.services.bitlooker_backend.loadbalancer.server.port=5000"
+      - "traefik.http.routers.ldpvault_backend.rule=Host(`${API_DOMAIN}`)"
+      - "traefik.http.routers.ldpvault_backend.entrypoints=websecure"
+      - "traefik.http.routers.ldpvault_backend.tls=true"
+      - "traefik.http.routers.ldpvault_backend.tls.certresolver=myresolver"
+      - "traefik.http.services.ldpvault_backend.loadbalancer.server.port=5000"
     restart: unless-stopped
 
   frontend:
     build: ./frontend
-    container_name: ldp_bitwarden_frontend
+    container_name: ldp_vault_frontend
     depends_on:
       - backend
     networks:
@@ -46,11 +46,11 @@ services:
       - traefik_public
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.bitlooker_frontend.rule=Host(`${FRONTEND_DOMAIN}`)"
-      - "traefik.http.routers.bitlooker_frontend.entrypoints=websecure"
-      - "traefik.http.routers.bitlooker_frontend.tls=true"
-      - "traefik.http.routers.bitlooker_frontend.tls.certresolver=myresolver"
-      - "traefik.http.services.bitlooker_frontend.loadbalancer.server.port=80"
+      - "traefik.http.routers.ldpvault_frontend.rule=Host(`${FRONTEND_DOMAIN}`)"
+      - "traefik.http.routers.ldpvault_frontend.entrypoints=websecure"
+      - "traefik.http.routers.ldpvault_frontend.tls=true"
+      - "traefik.http.routers.ldpvault_frontend.tls.certresolver=myresolver"
+      - "traefik.http.services.ldpvault_frontend.loadbalancer.server.port=80"
     restart: unless-stopped
 
 volumes:

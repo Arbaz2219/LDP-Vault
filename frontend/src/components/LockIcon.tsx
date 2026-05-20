@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BitwardenLockIcon: React.FC = () => {
+const VaultLockIcon: React.FC = () => {
   return (
     <svg width="120" height="120" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* Shackle */}
@@ -25,4 +25,4 @@ const BitwardenLockIcon: React.FC = () => {
   );
 };
 
-export default BitwardenLockIcon;
+export default VaultLockIcon;

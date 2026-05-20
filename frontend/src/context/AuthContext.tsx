@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const unlock = async (password: string): Promise<boolean> => {
-    // In a real Bitwarden clone, we'd use this password to derive a key
+    // In a real LDP Vault clone, we'd use this password to derive a key
     // and try to decrypt a "symmetric key" stored in the vault.
     // For this prototype, we'll just simulate a successful unlock.
     // We should ideally verify it against the server if not already verified.
@@ -85,7 +85,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // 3 minutes = 180,000 milliseconds
       timeout = setTimeout(() => {
         if (token && !isLocked) {
-          console.log('Auto-locking due to inactivity');
           lock();
         }
       }, 180000);

@@ -1,4 +1,4 @@
-# 🚀 Deployment Guide - LDP Bitwarden
+# 🚀 Deployment Guide - LDP Vault
 
 This guide explains how to deploy the LDP Logistics Password Manager to a Linux server using Docker.
 
@@ -11,8 +11,8 @@ This guide explains how to deploy the LDP Logistics Password Manager to a Linux 
 
 ### Clone the Repository
 ```bash
-git clone https://github.com/Arbaz2219/Bit-looker.git
-cd Bit-looker
+git clone https://github.com/Arbaz2219/LDP-Vault.git
+cd LDP-Vault
 ```
 
 ### Configure Environment Variables
@@ -35,12 +35,12 @@ Once the containers are running, you need to run migrations and seed the super a
 
 ### Run Migrations
 ```bash
-docker exec -it ldp_bitwarden_backend npx prisma migrate deploy
+docker exec -it ldp_Vault_backend npx prisma migrate deploy
 ```
 
 ### Seed Super Admin
 ```bash
-docker exec -it ldp_bitwarden_backend npm run seed
+docker exec -it ldp_Vault_backend npm run seed
 ```
 
 ## 5. Accessing the Vault

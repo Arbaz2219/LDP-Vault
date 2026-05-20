@@ -23,7 +23,12 @@ const AppContent: React.FC = () => {
   }
 
   if (isLocked) {
-    return <VaultLock />;
+    return (
+      <Routes>
+        <Route path="/vault-lock" element={<VaultLock />} />
+        <Route path="*" element={<Navigate to="/vault-lock" replace />} />
+      </Routes>
+    );
   }
 
   return (

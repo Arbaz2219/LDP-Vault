@@ -2,6 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../index';
 import { authenticateJWT, AuthRequest } from '../middleware/auth';
+import { sendInvitationEmail } from '../utils/email';
 
 const router = Router();
 
@@ -121,6 +122,9 @@ router.post('/users', authenticateJWT, isAdmin, async (req: AuthRequest, res) =>
         organizationId: adminUser.organizationId
       }
     });
+
+    // Send the welcome email with their initial credentials
+    await sendInvitationEmail(email, name, password || 'password123');
 
     res.status(201).json(newUser);
   } catch (error) {
