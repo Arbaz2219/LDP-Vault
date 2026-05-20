@@ -42,7 +42,7 @@ const AdminConsole: React.FC = () => {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [newDeptName, setNewDeptName] = useState('');
-  const [orgName, setOrgName] = useState('LDP Vault');
+  const [orgName, setOrgName] = useState('LDP VAULT');
   const [isInviting, setIsInviting] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteName, setInviteName] = useState('');
@@ -178,7 +178,7 @@ const AdminConsole: React.FC = () => {
       <div className="flex items-center justify-between px-8 py-4 border-b border-gray-100">
         <div className="flex items-center gap-2">
            <LDPLogo className="h-8 w-auto" />
-           <h1 className="text-2xl font-medium text-gray-800">LDP Vault</h1>
+           <h1 className="text-2xl font-medium text-gray-800">LDP VAULT</h1>
         </div>
         <div className="flex items-center gap-4">
            <button className="bg-[#175ddc] hover:bg-[#134db8] text-white px-4 py-1.5 rounded flex items-center gap-2 text-sm font-bold shadow-sm transition-colors">
@@ -200,7 +200,7 @@ const AdminConsole: React.FC = () => {
         <div className="w-64 bg-[#f8f9fc] border-r border-gray-200 overflow-y-auto px-4 py-6">
           <div className="space-y-1">
             <div className="flex items-center gap-3 px-3 py-2 text-gray-600 text-sm font-medium cursor-pointer hover:bg-gray-100 rounded">
-              <Globe size={18} /> LDP Vault
+              <Globe size={18} /> LDP VAULT
             </div>
             {navItems.map((item) => (
               <button
@@ -230,7 +230,7 @@ const AdminConsole: React.FC = () => {
         <div className="flex-1 flex flex-col overflow-hidden px-8 py-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold text-gray-800">
-              LDP Vault {activeTab === 'collections' ? 'collections' : activeTab}
+              LDP VAULT {activeTab === 'collections' ? 'collections' : activeTab}
             </h2>
           </div>
 

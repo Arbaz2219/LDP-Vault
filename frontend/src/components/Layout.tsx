@@ -26,7 +26,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="p-4 flex items-center gap-2 mb-4">
           <LDPLogo className="h-8 w-auto brightness-0 invert" />
           <div>
-            <h1 className="font-bold text-lg leading-tight">LDP Vault</h1>
+            <h1 className="font-bold text-lg leading-tight">LDP VAULT</h1>
             <p className="text-[10px] opacity-80 uppercase tracking-wider font-semibold">Password Manager</p>
           </div>
         </div>
