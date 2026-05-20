@@ -29,7 +29,7 @@ app.use('/api/collection', collectionRoutes);
 
 // Basic health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: 'LDP Vault API' });
+  res.json({ status: 'ok', service: 'LDP VAULT API' });
 });
 
 // Start server
