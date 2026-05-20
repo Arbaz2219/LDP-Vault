@@ -26,7 +26,7 @@ const Send: React.FC = () => {
       text: 'root:supersecretpassword',
       expiresIn: '1 day',
       createdAt: new Date().toLocaleDateString(),
-      link: 'https://send.bitlockerldp.com/s/72a1b3'
+      link: 'https://send.ldpvault.com/s/72a1b3'
     }
   ]);
 
@@ -47,7 +47,7 @@ const Send: React.FC = () => {
       text,
       expiresIn,
       createdAt: new Date().toLocaleDateString(),
-      link: `https://send.bitlockerldp.com/s/${randomId}`
+      link: `https://send.ldpvault.com/s/${randomId}`
     };
 
     setSends([newSend, ...sends]);
@@ -82,7 +82,7 @@ const Send: React.FC = () => {
 
       <div className="flex-1 overflow-y-auto px-8 py-8 relative">
         <p className="text-sm text-gray-500 mb-6">
-          Bitlocker LDP Send is a secure, ephemeral way to share credentials, notes, or secrets with colleagues.
+          LDP Vault Send is a secure, ephemeral way to share credentials, notes, or secrets with colleagues.
         </p>
 
         {sends.length === 0 ? (

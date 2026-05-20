@@ -49,7 +49,7 @@ const Login: React.FC = () => {
       <header className="p-6 z-10">
         <div className="flex items-center gap-2 text-[#175ddc] hover:opacity-90 transition-opacity cursor-pointer">
           <LDPLogo className="h-8 w-auto" />
-          <span className="text-2xl font-bold tracking-tight text-[#175ddc]">Bitlocker LDP</span>
+          <span className="text-2xl font-bold tracking-tight text-[#175ddc]">LDP Vault</span>
         </div>
       </header>
 
@@ -194,7 +194,7 @@ const Login: React.FC = () => {
       {/* Footer Branding */}
       <footer className="py-8 text-center text-[11px] text-[#6b778c] leading-relaxed z-10">
         <p className="hover:underline cursor-pointer font-medium hover:text-[#175ddc] transition-colors">
-          Accessing bitlockerldp.com
+          Accessing ldpvault.com
         </p>
         <p className="mt-0.5">© 2026 LDP Logistics Inc.</p>
       </footer>
