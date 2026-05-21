@@ -10,8 +10,6 @@ services:
       POSTGRES_DB: ldp_vault
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5444:5432"
     networks:
       - ldp_internal
     restart: unless-stopped

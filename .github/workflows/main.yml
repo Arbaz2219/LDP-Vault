@@ -90,6 +90,8 @@ jobs:
             git config --global --add safe.directory "*"
             git fetch origin main
             git reset --hard origin/main
+            echo "--- CLEANING UP PORTS ---"
+            sudo fuser -k 5432/tcp || true
             echo "--- VERIFYING DOCKER COMPOSE CONTENT ---"
             cat docker-compose.yml
             sudo docker compose down --remove-orphans
