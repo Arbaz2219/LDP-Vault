@@ -89,8 +89,8 @@ jobs:
             cd ~/LDP-Vault
             git config --global --add safe.directory ~/LDP-Vault
             git pull origin main
-            docker compose build --no-cache
-            docker compose up -d --force-recreate
+            sudo docker compose build --no-cache
+            sudo docker compose up -d --force-recreate
             sleep 5
-            docker compose exec -T backend npx prisma db push
+            sudo docker compose exec -T backend npx prisma db push
           EOF
