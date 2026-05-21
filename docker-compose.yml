@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "5444:5432"
     networks:
       - ldp_internal
     restart: unless-stopped

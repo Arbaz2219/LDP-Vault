@@ -89,6 +89,8 @@ jobs:
             cd ~/LDP-Vault
             git config --global --add safe.directory ~/LDP-Vault
             git pull origin main
+            echo "--- VERIFYING DOCKER COMPOSE CONTENT ---"
+            cat docker-compose.yml
             docker compose down --remove-orphans
             docker compose build --no-cache
             docker compose up -d --force-recreate
