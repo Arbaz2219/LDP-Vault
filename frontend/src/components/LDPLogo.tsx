@@ -1,13 +1,13 @@
 import React from 'react';
 
-const LDPLogo: React.FC<{ className?: string }> = ({ className = "h-10 w-auto" }) => {
+const LDPLogo: React.FC<{ className?: string; hideText?: boolean }> = ({ className = "h-10 w-auto", hideText = false }) => {
   return (
     <div className={`${className} flex flex-col items-center justify-center select-none shrink-0`}>
       <svg
         viewBox="0 0 100 100"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-2/3 drop-shadow-sm"
+        className={`w-full ${hideText ? 'h-full' : 'h-2/3'} drop-shadow-sm`}
       >
         {/* Padlock shackle */}
         <path 
@@ -27,7 +27,7 @@ const LDPLogo: React.FC<{ className?: string }> = ({ className = "h-10 w-auto" }
           stroke="#1d2736" 
           strokeWidth="4"
         />
-        {/* Padlock inner plate */}
+        {/* Padlock inner plate illustrating the password dots/keyhole area */}
         <rect 
           x="28" 
           y="48" 
@@ -50,20 +50,23 @@ const LDPLogo: React.FC<{ className?: string }> = ({ className = "h-10 w-auto" }
         >
           ***--
         </text>
+        {/* Base shackle support points */}
         <rect x="29" y="38" width="6" height="5" rx="1" fill="#1d2736" />
         <rect x="65" y="38" width="6" height="5" rx="1" fill="#1d2736" />
       </svg>
       
-      {/* Brand Text */}
-      <div className="flex flex-col items-center w-full">
-        <h1 className="text-[#175ddc] font-[900] text-[1.6em] tracking-tighter leading-none">LDP VAULT</h1>
-        <div className="flex items-center gap-1 w-full mt-1">
-           <div className="h-[2px] flex-1 bg-[#175ddc] opacity-30"></div>
-           <span className="text-[#175ddc] text-[0.45em] font-bold tracking-[0.2em] uppercase">LOCK</span>
-           <div className="h-[2px] flex-1 bg-[#175ddc] opacity-30"></div>
+      {/* Brand Text - Only shown if hideText is false */}
+      {!hideText && (
+        <div className="flex flex-col items-center w-full">
+          <h1 className="text-[#175ddc] font-[900] text-[1.6em] tracking-tighter leading-none">LDP VAULT</h1>
+          <div className="flex items-center gap-1 w-full mt-1">
+             <div className="h-[2px] flex-1 bg-[#175ddc] opacity-30"></div>
+             <span className="text-[#175ddc] text-[0.45em] font-bold tracking-[0.2em] uppercase">LOCK</span>
+             <div className="h-[2px] flex-1 bg-[#175ddc] opacity-30"></div>
+          </div>
+          <p className="text-[#175ddc] text-[0.4em] font-bold tracking-[0.3em] mt-1 opacity-90">SECURE • STORE • PROTECT</p>
         </div>
-        <p className="text-[#175ddc] text-[0.4em] font-bold tracking-[0.3em] mt-1 opacity-90">SECURE • STORE • PROTECT</p>
-      </div>
+      )}
     </div>
   );
 };

@@ -32,7 +32,7 @@ const VaultLock: React.FC = () => {
         
         {/* Center Brand Logo */}
         <div className="mb-8 flex flex-col items-center scale-110">
-          <LDPLogo className="h-32 w-auto" />
+          <LDPLogo className="h-32 w-auto" hideText={true} />
         </div>
 
         {/* Heading */}
