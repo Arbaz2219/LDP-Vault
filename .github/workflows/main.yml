@@ -86,8 +86,8 @@ jobs:
       - name: Deploy via SSH
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-            cd /home/ldpbitlooker/LDP-Vault
-            git config --global --add safe.directory /home/ldpbitlooker/LDP-Vault
+            cd ~/LDP-Vault
+            git config --global --add safe.directory ~/LDP-Vault
             git pull origin main
             docker compose build --no-cache
             docker compose up -d --force-recreate
