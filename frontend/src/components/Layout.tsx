@@ -24,7 +24,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {/* Sidebar */}
       <aside className="w-64 bg-[#175ddc] text-white flex flex-col shrink-0">
         <div className="p-4 flex items-center gap-2 mb-4">
-          <LDPLogo className="h-16 w-auto" />
+          <LDPLogo className="h-14 w-auto" />
           <div className="hidden">
             <h1 className="font-bold text-lg leading-tight">LDP VAULT</h1>
             <p className="text-[10px] opacity-80 uppercase tracking-wider font-semibold">Password Manager</p>

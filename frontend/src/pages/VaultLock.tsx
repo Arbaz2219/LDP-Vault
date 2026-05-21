@@ -18,81 +18,35 @@ const VaultLock: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc] flex flex-col justify-between font-sans relative overflow-hidden select-none">
+    <div className="min-h-screen bg-[#f8f9fc] flex flex-col justify-between font-sans relative overflow-y-auto select-none">
       
       {/* Top Left Brand Header */}
-      <header className="p-6 z-10">
+      <header className="p-4 z-10">
         <div className="flex items-center gap-2 text-[#175ddc] hover:opacity-90 transition-opacity cursor-pointer">
-          <LDPLogo className="h-48 w-auto py-2" />
+          <LDPLogo className="h-14 w-auto" />
         </div>
       </header>
 
       {/* Center Main Content Container */}
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 z-10">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-4 z-10">
         
-        {/* Animated Locked Padlock SVG Illustration */}
-        <div className="mb-6 flex flex-col items-center">
-          <svg className="w-24 h-24 drop-shadow-[0_4px_6px_rgba(0,0,0,0.05)]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* Padlock shackle */}
-            <path 
-              d="M32 42V28C32 17.5 40.5 9.5 50 9.5C59.5 9.5 68 17.5 68 28V42" 
-              stroke="#175ddc" 
-              strokeWidth="4.5" 
-              strokeLinecap="round"
-            />
-            {/* Padlock body */}
-            <rect 
-              x="20" 
-              y="40" 
-              width="60" 
-              height="46" 
-              rx="12" 
-              fill="#ffffff" 
-              stroke="#1d2736" 
-              strokeWidth="4"
-            />
-            {/* Padlock inner plate */}
-            <rect 
-              x="28" 
-              y="48" 
-              width="44" 
-              height="20" 
-              rx="6" 
-              fill="#fecb2f" 
-              stroke="#1d2736" 
-              strokeWidth="3.5"
-            />
-            {/* Keyhole or Password Dots representation */}
-            <text 
-              x="50" 
-              y="62" 
-              fontFamily="monospace" 
-              fontSize="16" 
-              fontWeight="900" 
-              fill="#1d2736" 
-              textAnchor="middle" 
-              letterSpacing="2"
-            >
-              ***--
-            </text>
-            {/* Base shackle support */}
-            <rect x="29" y="38" width="6" height="5" rx="1" fill="#1d2736" />
-            <rect x="65" y="38" width="6" height="5" rx="1" fill="#1d2736" />
-          </svg>
+        {/* Center Brand Logo */}
+        <div className="mb-8 flex flex-col items-center scale-110">
+          <LDPLogo className="h-32 w-auto" />
         </div>
 
         {/* Heading */}
-        <h1 className="text-[28px] font-semibold text-[#172b4d] tracking-tight mb-1 text-center">
+        <h1 className="text-2xl font-semibold text-[#172b4d] tracking-tight mb-1 text-center">
           Your vault is locked
         </h1>
 
         {/* Dynamic Subheading */}
-        <p className="text-sm text-[#5e6c84] mb-8 font-medium text-center">
+        <p className="text-xs text-[#5e6c84] mb-6 font-medium text-center">
           {user?.email}
         </p>
 
         {/* Unlock Form Card */}
-        <div className="bg-white p-8 rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-[#e2e8f0] w-full max-w-[448px] transition-all">
+        <div className="bg-white p-6 rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-[#e2e8f0] w-full max-w-[400px] transition-all">
           
           {error && (
             <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-6 text-xs text-center border border-red-100 font-medium">
@@ -148,7 +102,7 @@ const VaultLock: React.FC = () => {
       </main>
 
       {/* Footer Branding */}
-      <footer className="py-8 text-center text-[11px] text-[#6b778c] leading-relaxed z-10">
+      <footer className="py-4 text-center text-[10px] text-[#6b778c] leading-relaxed z-10">
         <p className="hover:underline cursor-pointer font-medium hover:text-[#175ddc] transition-colors">
           Accessing vault.ldplogistics.com
         </p>
