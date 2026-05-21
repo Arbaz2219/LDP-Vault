@@ -176,7 +176,7 @@ const AdminConsole: React.FC = () => {
     <div className="flex-1 flex flex-col overflow-hidden bg-white">
       {/* Header */}
       <div className="flex items-center justify-between px-8 py-4 border-b border-gray-100">
-           <LDPLogo className="h-10 w-auto" />
+           <LDPLogo className="h-14 w-auto" />
         <div className="flex items-center gap-4">
            <button className="bg-[#175ddc] hover:bg-[#134db8] text-white px-4 py-1.5 rounded flex items-center gap-2 text-sm font-bold shadow-sm transition-colors">
               <Plus size={16} />

@@ -48,7 +48,7 @@ const Login: React.FC = () => {
       {/* Top Left Brand Header */}
       <header className="p-6 z-10">
         <div className="flex items-center gap-2 text-[#175ddc] hover:opacity-90 transition-opacity cursor-pointer">
-          <LDPLogo className="h-16 w-auto" />
+          <LDPLogo className="h-48 w-auto py-2" />
         </div>
       </header>
 

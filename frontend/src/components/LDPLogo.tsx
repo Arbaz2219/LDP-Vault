@@ -1,11 +1,11 @@
 import React from 'react';
-import ldpVaultFinalLogoUrl from '../assets/ldp_vault_final_logo.png';
+import ldpVaultProfLogoUrl from '../assets/ldp_vault_professional_logo.png';
 
-const LDPLogo: React.FC<{ className?: string }> = ({ className = "w-12 h-12" }) => {
+const LDPLogo: React.FC<{ className?: string }> = ({ className = "h-20 w-auto" }) => {
   return (
     <img 
-      src={ldpVaultFinalLogoUrl} 
-      alt="LDP VAULT Logo" 
+      src={ldpVaultProfLogoUrl} 
+      alt="LDP VAULT - LOCK" 
       className={`${className} object-contain`} 
     />
   );
