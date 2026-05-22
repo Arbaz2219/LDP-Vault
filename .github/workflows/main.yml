@@ -90,13 +90,9 @@ jobs:
             git config --global --add safe.directory "*"
             git fetch origin main
             git reset --hard origin/main
-            echo "--- CLEANING UP PORTS ---"
-            sudo fuser -k 5432/tcp || true
-            echo "--- VERIFYING DOCKER COMPOSE CONTENT ---"
-            cat docker-compose.yml
-            sudo docker compose down --remove-orphans
-            sudo docker compose build --no-cache
-            sudo docker compose up -d --force-recreate
+            sudo docker compose -f docker-compose.yml --env-file .env down 
+            sudo docker compose -f docker-compose.yml --env-file .env build --no-cache
+            sudo docker compose -f docker-compose.yml --env-file .env up -d --remove-orphans
             sleep 5
-            sudo docker compose exec -T backend npx prisma db push
+            sudo docker compose -f docker-compose.yml --env-file .env exec -T backend npx prisma db push
           EOF
