@@ -92,7 +92,7 @@ jobs:
             git reset --hard origin/main
             sudo docker compose -f docker-compose.yml --env-file .env down 
             sudo docker compose -f docker-compose.yml --env-file .env build --no-cache
-            sudo docker compose -f docker-compose.yml --env-file .env up -d --remove-orphans
+            sudo docker compose -f docker-compose.yml --env-file .env up -d
             sleep 5
             sudo docker compose -f docker-compose.yml --env-file .env exec -T backend npx prisma db push
           EOF
