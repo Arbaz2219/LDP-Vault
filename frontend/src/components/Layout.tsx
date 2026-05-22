@@ -22,101 +22,81 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="flex h-screen bg-white overflow-hidden font-sans">
       {/* Sidebar */}
-      <aside className="w-64 bg-[#175ddc] text-white flex flex-col shrink-0">
-        <div className="p-4 flex items-center gap-2 mb-4">
-          <LDPLogo className="h-14 w-auto" />
-          <div className="hidden">
-            <h1 className="font-bold text-lg leading-tight">LDP VAULT</h1>
-            <p className="text-[10px] opacity-80 uppercase tracking-wider font-semibold">Password Manager</p>
-          </div>
+      <aside className="w-64 bg-[#175ddc] flex flex-col shrink-0 relative overflow-hidden">
+        {/* Sidebar background decorative blobs */}
+        <div className="absolute top-[-10%] left-[-20%] w-48 h-48 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-48 h-48 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div className="py-10 flex flex-col items-center justify-center border-b border-white/10 mb-6 z-10">
+          <LDPLogo className="h-28 w-auto drop-shadow-xl" variant="white" />
+          <p className="text-[9px] text-white/40 font-black tracking-[0.3em] uppercase mt-4">Enterprise Edition</p>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-2 space-y-1">
-          <Link
-            to="/dashboard"
-            className={`flex items-center gap-3 px-3 py-2 rounded transition-colors ${
-              location.pathname === '/dashboard' || location.pathname === '/' ? 'bg-[#0047AB]' : 'hover:bg-[#134db8]'
-            }`}
-          >
-            <Shield size={18} />
-            <span className="text-sm font-medium">Vaults</span>
-          </Link>
-          <Link
-            to="/send"
-            className={`flex items-center gap-3 px-3 py-2 rounded transition-colors ${
-              location.pathname === '/send' ? 'bg-[#0047AB]' : 'hover:bg-[#134db8]'
-            }`}
-          >
-            <Send size={18} />
-            <span className="text-sm font-medium">Send</span>
-          </Link>
-          <Link
-            to="/tools"
-            className={`flex items-center justify-between px-3 py-2 rounded transition-colors ${
-              location.pathname === '/tools' ? 'bg-[#0047AB]' : 'hover:bg-[#134db8]'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <Wrench size={18} />
-              <span className="text-sm font-medium">Tools</span>
-            </div>
-          </Link>
-          <Link
-            to="/reports"
-            className={`flex items-center gap-3 px-3 py-2 rounded transition-colors ${
-              location.pathname === '/reports' ? 'bg-[#0047AB]' : 'hover:bg-[#134db8]'
-            }`}
-          >
-            <BarChart2 size={18} />
-            <span className="text-sm font-medium">Reports</span>
-          </Link>
-          <Link
-            to="/settings"
-            className="flex items-center gap-3 px-3 py-2 rounded hover:bg-[#134db8] transition-colors"
-          >
-            <Settings size={18} />
-            <span className="text-sm font-medium">Settings</span>
-          </Link>
+        <nav className="flex-1 overflow-y-auto px-4 space-y-1.5 z-10">
+          {[
+            { to: '/dashboard', icon: Shield, label: 'Vaults', active: location.pathname === '/dashboard' || location.pathname === '/' },
+            { to: '/send', icon: Send, label: 'Send', active: location.pathname === '/send' },
+            { to: '/tools', icon: Wrench, label: 'Tools', active: location.pathname === '/tools' },
+            { to: '/reports', icon: BarChart2, label: 'Reports', active: location.pathname === '/reports' },
+            { to: '/settings', icon: Settings, label: 'Settings', active: location.pathname === '/settings' },
+          ].map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-300 group ${
+                item.active 
+                ? 'bg-white/15 text-white shadow-lg shadow-black/5 backdrop-blur-md' 
+                : 'text-white/60 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <item.icon size={18} className={`${item.active ? 'opacity-100' : 'opacity-50 group-hover:opacity-100'} transition-opacity`} />
+              <span className={`text-sm ${item.active ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
+            </Link>
+          ))}
         </nav>
 
         {/* Bottom Navigation Sections */}
-        <div className="mt-auto p-2 space-y-2 border-t border-[#134db8]">
+        <div className="mt-auto p-4 space-y-3 z-10">
           <Link
             to="/dashboard"
-            className="flex items-center gap-3 px-3 py-2 rounded bg-[#0047AB] transition-colors"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 text-white/90 border border-white/5 hover:bg-white/15 transition-all group"
           >
-            <Lock size={16} />
-            <span className="text-sm font-medium">Password Manager</span>
+            <Lock size={16} className="opacity-70 group-hover:opacity-100" />
+            <span className="text-xs font-bold uppercase tracking-wider">Secure Vault</span>
           </Link>
           
           {isAdmin && (
             <Link
               to="/admin"
-              className={`flex items-center gap-3 px-3 py-2 rounded transition-colors ${
-                location.pathname.startsWith('/admin') ? 'bg-[#0047AB]' : 'hover:bg-[#134db8]'
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                location.pathname.startsWith('/admin') 
+                ? 'bg-white shadow-xl text-[#175ddc]' 
+                : 'bg-black/10 text-white/70 hover:bg-black/20'
               }`}
             >
               <LayoutDashboard size={16} />
-              <span className="text-sm font-medium">Admin Console</span>
+              <span className="text-xs font-bold uppercase tracking-wider">Admin Console</span>
             </Link>
           )}
 
-          <div className="pt-4 pb-2 px-3">
-             <div className="flex items-center justify-between group cursor-pointer">
-                <div className="flex items-center gap-2 overflow-hidden">
-                  <div className="w-8 h-8 rounded-full bg-blue-400 flex items-center justify-center text-white font-bold text-xs shrink-0">
+          {/* Premium User Widget */}
+          <div className="pt-6 pb-2 px-1">
+             <div className="bg-black/15 backdrop-blur-md p-3 rounded-2xl border border-white/5 flex items-center justify-between group">
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 shadow-lg flex items-center justify-center text-white font-black text-sm shrink-0 border border-white/20">
                     {user?.name?.[0].toUpperCase()}
                   </div>
                   <div className="truncate">
-                    <p className="text-xs font-bold text-white truncate">{user?.name}</p>
+                    <p className="text-[11px] font-black text-white truncate uppercase tracking-tighter">{user?.name}</p>
+                    <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest">Premium User</p>
                   </div>
                 </div>
-                <div className="flex gap-1">
-                  <button onClick={(e) => { e.preventDefault(); lock(); }} title="Lock Vault">
-                    <Lock size={12} className="opacity-60 hover:opacity-100" />
+                <div className="flex flex-col gap-2">
+                  <button onClick={(e) => { e.preventDefault(); lock(); }} title="Lock Vault" className="text-white/40 hover:text-white transition-colors">
+                    <Lock size={14} />
                   </button>
-                  <button onClick={(e) => { e.preventDefault(); logout(); }} title="Log Out">
-                    <LogOut size={12} className="opacity-60 hover:opacity-100" />
+                  <button onClick={(e) => { e.preventDefault(); logout(); }} title="Log Out" className="text-white/40 hover:text-red-400 transition-colors">
+                    <LogOut size={14} />
                   </button>
                 </div>
              </div>

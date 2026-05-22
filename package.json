@@ -6,5 +6,9 @@
     "dev:frontend": "npm run dev --prefix frontend",
     "dev:backend": "npm run dev --prefix backend",
     "dev": "npx concurrently \"npm run dev:frontend\" \"npm run dev:backend\" -n \"frontend,backend\" -c \"blue,green\""
+  },
+  "dependencies": {
+    "@azure/msal-browser": "^5.11.0",
+    "@azure/msal-node": "^5.2.2"
   }
 }
