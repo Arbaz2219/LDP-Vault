@@ -1,21 +1,9 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendInvitationEmail = async (to: string, name: string, tempPassword: string) => {
   try {
-    // Basic Office365 SMTP configuration
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.office365.com',
-      port: 587,
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      tls: {
-        ciphers: 'SSLv3'
-      }
-    });
-
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
         <h2 style="color: #175ddc;">Welcome to LDP Logistics!</h2>
@@ -32,17 +20,22 @@ export const sendInvitationEmail = async (to: string, name: string, tempPassword
       </div>
     `;
 
-    const info = await transporter.sendMail({
-      from: `"LDP Logistics" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
-      to,
+    const { data, error } = await resend.emails.send({
+      from: 'LDP Logistics <help@vault.ldplogistics.com>',
+      to: [to],
       subject: "Welcome to LDP Logistics - Your Account Details",
       html: htmlContent,
     });
 
-    console.log("Message sent: %s", info.messageId);
+    if (error) {
+      console.error("Resend API Error:", error);
+      return false;
+    }
+
+    console.log("Message sent successfully via Resend:", data?.id);
     return true;
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error("Error sending email via Resend:", error);
     return false;
   }
 };

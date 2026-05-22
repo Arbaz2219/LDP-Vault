@@ -5,9 +5,9 @@ services:
     image: postgres:15-alpine
     container_name: ldp_vault_db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: ldp_vault
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -18,8 +18,10 @@ services:
     build: ./backend
     container_name: ldp_vault_backend
     environment:
-      DATABASE_URL: "postgresql://postgres:password@db:5432/ldp_vault"
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
       JWT_SECRET: "${JWT_SECRET}"
+      RESEND_API_KEY: "${RESEND_API_KEY}"
+
     depends_on:
       - db
     networks:
