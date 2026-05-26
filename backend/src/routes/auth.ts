@@ -97,6 +97,7 @@ router.get('/microsoft', async (req, res) => {
   const authCodeUrlParameters = {
     scopes: ["user.read"],
     redirectUri: REDIRECT_URI,
+    prompt: "select_account",
   };
 
   try {
@@ -151,9 +152,9 @@ router.get('/microsoft/callback', async (req, res) => {
       role: user.role
     }))}`);
 
-  } catch (error) {
-    console.error('Microsoft callback error:', error);
-    res.status(500).send('Authentication failed');
+  } catch (error: any) {
+    console.error('Microsoft callback full error:', JSON.stringify(error, null, 2));
+    res.status(500).send(`Authentication failed: ${error.errorMessage || error.message || 'Unknown error'}`);
   }
 });
 

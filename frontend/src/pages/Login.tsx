@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import api from '../api';
+import api, { API_URL } from '../api';
 import { Eye, EyeOff } from 'lucide-react';
 import LDPLogo from '../components/LDPLogo';
 
@@ -21,10 +21,10 @@ const Login: React.FC = () => {
     if (token && userParam) {
       try {
         const userData = JSON.parse(decodeURIComponent(userParam));
-        // SSO login doesn't provide a password in the URL for security
         login(token, userData);
-        // Clean up URL
-        window.history.replaceState({}, document.title, window.location.pathname);
+        // Clean up URL and force navigation to dashboard
+        window.history.replaceState({}, document.title, '/dashboard');
+        window.location.reload(); // Force refresh to Dashboard state
       } catch (e) {
         console.error('Failed to parse SSO data:', e);
       }
@@ -183,7 +183,7 @@ const Login: React.FC = () => {
                     </div>
                     <button 
                       type="button"
-                      onClick={() => window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/microsoft`}
+                      onClick={() => window.location.href = `${API_URL}/api/auth/microsoft`}
                       className="w-full py-3.5 px-4 flex items-center justify-center gap-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold rounded-xl transition-all text-sm shadow-sm active:scale-[0.98]"
                     >
                       <svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">

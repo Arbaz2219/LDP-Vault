@@ -11,49 +11,50 @@ datasource db {
 model Organization {
   id          String       @id @default(uuid())
   name        String
-  users       User[]
-  departments Department[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  departments Department[]
+  users       User[]
 }
 
 model Department {
   id             String           @id @default(uuid())
   name           String
   organizationId String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
   organization   Organization     @relation(fields: [organizationId], references: [id])
   users          DepartmentUser[]
   vaultItems     VaultItem[]
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
 }
 
 model User {
   id                 String           @id @default(uuid())
   email              String           @unique
-  masterPasswordHash String
+  masterPasswordHash String?
   name               String
-  role               String           @default("USER") // Changed from enum Role
+  role               String           @default("USER")
   organizationId     String?
-  organization       Organization?    @relation(fields: [organizationId], references: [id])
-  departments        DepartmentUser[]
-  personalVaultItems VaultItem[]
-  folders            Folder[]
-  collections        Collection[]
-  auditLogs          AuditLog[]
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
+  microsoftId        String?          @unique
+  auditLogs          AuditLog[]
+  collections        Collection[]
+  departments        DepartmentUser[]
+  folders            Folder[]
+  organization       Organization?    @relation(fields: [organizationId], references: [id])
+  personalVaultItems VaultItem[]
 }
 
 model DepartmentUser {
   id           String     @id @default(uuid())
   userId       String
   departmentId String
-  permission   String     @default("READ") // Changed from enum Permission
-  user         User       @relation(fields: [userId], references: [id])
-  department   Department @relation(fields: [departmentId], references: [id])
+  permission   String     @default("READ")
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+  department   Department @relation(fields: [departmentId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
 
   @@unique([userId, departmentId])
 }
@@ -62,76 +63,63 @@ model Folder {
   id         String      @id @default(uuid())
   name       String
   userId     String
-  user       User        @relation(fields: [userId], references: [id])
-  vaultItems VaultItem[]
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
+  user       User        @relation(fields: [userId], references: [id])
+  vaultItems VaultItem[]
 }
 
 model Collection {
   id         String      @id @default(uuid())
   name       String
   userId     String
-  user       User        @relation(fields: [userId], references: [id])
-  vaultItems VaultItem[]
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
+  user       User        @relation(fields: [userId], references: [id])
+  vaultItems VaultItem[]
 }
 
 model VaultItem {
-  id           String      @id @default(uuid())
-  name         String
-  username     String?
-  password     String? // Encrypted
-  url          String?
-  domain       String?     // Extracted domain for matching
-  notes        String? // Encrypted
-  isHidden     Boolean     @default(false)
-  
-  // Custom metadata for item types & styling
-  type         String      @default("login") // "login", "card", "identity", "note", "ssh"
-  isFavorite   Boolean     @default(false)
-  
-  // Card-specific fields (encrypted or plain string placeholders)
-  cardholderName String?
-  cardNumber     String?
+  id              String      @id @default(uuid())
+  name            String
+  username        String?
+  password        String?
+  url             String?
+  domain          String?
+  notes           String?
+  isHidden        Boolean     @default(false)
+  type            String      @default("login")
+  isFavorite      Boolean     @default(false)
+  cardholderName  String?
+  cardNumber      String?
   expirationMonth String?
   expirationYear  String?
-  cvv            String?
-  
-  // Identity-specific fields
-  firstName      String?
-  lastName       String?
-  address        String?
-  phone          String?
-  licenseNumber  String?
-
-  // Can belong to a user (personal) OR a department (organization)
-  userId       String?
-  user         User?       @relation(fields: [userId], references: [id])
-  
-  departmentId String?
-  department   Department? @relation(fields: [departmentId], references: [id])
-
-  folderId     String?
-  folder       Folder?     @relation(fields: [folderId], references: [id])
-
-  collectionId String?
-  collection   Collection? @relation(fields: [collectionId], references: [id])
-
-  auditLogs    AuditLog[]
-
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  cvv             String?
+  firstName       String?
+  lastName        String?
+  address         String?
+  phone           String?
+  licenseNumber   String?
+  userId          String?
+  departmentId    String?
+  folderId        String?
+  collectionId    String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  auditLogs       AuditLog[]
+  collection      Collection? @relation(fields: [collectionId], references: [id])
+  department      Department? @relation(fields: [departmentId], references: [id])
+  folder          Folder?     @relation(fields: [folderId], references: [id])
+  user            User?       @relation(fields: [userId], references: [id])
 }
 
 model AuditLog {
-  id        String   @id @default(uuid())
-  action    String   // "REVEAL", "AUTOFILL", "COPY", "LOGIN"
+  id        String     @id @default(uuid())
+  action    String
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
   itemId    String?
-  item      VaultItem? @relation(fields: [itemId], references: [id])
-  timestamp DateTime @default(now())
+  timestamp DateTime   @default(now())
   details   String?
+  item      VaultItem? @relation(fields: [itemId], references: [id])
+  user      User       @relation(fields: [userId], references: [id])
 }

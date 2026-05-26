@@ -27,11 +27,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
+    const isActuallyAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    
     if (savedToken && savedUser) {
       try {
         setToken(savedToken);
         setUser(JSON.parse(savedUser));
-        setIsLocked(true);
+        // If we just logged in via SSO, or have a password in session, stay unlocked
+        const hasMasterPassword = sessionStorage.getItem('masterPassword');
+        setIsLocked(!(isActuallyAuthenticated || hasMasterPassword));
       } catch (e) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -43,6 +47,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(newToken);
     setUser(newUser);
     setIsLocked(false);
+    // Persist session
+    localStorage.setItem('isAuthenticated', 'true');
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(newUser));
     if (password) {
