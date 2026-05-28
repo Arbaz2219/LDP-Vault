@@ -32,9 +32,43 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'LDP VAULT API' });
 });
 
+// Auto-provision admin user for Arbaz
+const provisionAdmin = async () => {
+  try {
+    console.log('--- Provising Admin User Check ---');
+    const adminEmail = 'help-desk@ldplogistics.com';
+    
+    // Ensure an organization exists
+    let org = await prisma.organization.findFirst();
+    if (!org) {
+      org = await prisma.organization.create({
+        data: { name: 'LDP Logistics' }
+      });
+      console.log('Created Default Organization');
+    }
+
+    // Ensure the admin user exists and is configured correctly
+    const user = await prisma.user.findUnique({ where: { email: adminEmail } });
+    if (user) {
+      await prisma.user.update({
+        where: { email: adminEmail },
+        data: {
+          role: 'ADMIN',
+          portals: ['vault', 'admin'],
+          organizationId: org.id
+        }
+      });
+      console.log('Admin User Provisioned Successfully');
+    }
+  } catch (err) {
+    console.error('Failed to provision admin:', err);
+  }
+};
+
 // Start server
-app.listen(port, () => {
+app.listen(port, async () => {
   console.log(`Server is running on port ${port}`);
+  await provisionAdmin();
 });
 
 export { app, prisma };
