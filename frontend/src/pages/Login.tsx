@@ -87,7 +87,7 @@ const Login: React.FC = () => {
         
         {/* Mobile Header */}
         <header className="px-6 py-2 z-10 lg:hidden">
-          <div className="flex items-center gap-2 text-[#175ddc]">
+          <div className="flex items-center gap-2 text-[#0d43af]">
             <LDPLogo className="h-10 w-auto" />
           </div>
         </header>
@@ -114,7 +114,7 @@ const Login: React.FC = () => {
             {/* Login Form Card */}
             <div className="glass-card p-10 rounded-2xl border border-white relative">
               {/* Subtle top light effect */}
-              <div className="absolute top-0 left-10 right-10 h-px bg-gradient-to-r from-transparent via-[#175ddc]/20 to-transparent"></div>
+              <div className="absolute top-0 left-10 right-10 h-px bg-gradient-to-r from-transparent via-[#0d43af]/20 to-transparent"></div>
               
               {error && (
                 <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-8 text-xs text-center border border-red-100 font-bold animate-shake flex items-center justify-center gap-2">
@@ -133,7 +133,7 @@ const Login: React.FC = () => {
                     </div>
                     <input
                       type="email"
-                      className="w-full px-5 py-4 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#175ddc] focus:ring-4 focus:ring-[#175ddc]/5 text-[#1d2736] text-sm font-medium transition-all"
+                      className="w-full px-5 py-4 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#0d43af] focus:ring-4 focus:ring-[#0d43af]/5 text-[#1d2736] text-sm font-medium transition-all"
                       placeholder="e.g. name@company.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -146,12 +146,12 @@ const Login: React.FC = () => {
                 <div className="space-y-2 group">
                   <div className="flex justify-between items-center px-1">
                     <label className="text-[11px] font-black text-[#1d2736] uppercase tracking-wider opacity-60">Master Password</label>
-                    <button type="button" className="text-[10px] font-bold text-[#175ddc] hover:underline uppercase tracking-tight">Forgot?</button>
+                    <button type="button" className="text-[10px] font-bold text-[#0d43af] hover:underline uppercase tracking-tight">Forgot?</button>
                   </div>
                   <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}
-                      className="w-full pl-5 pr-14 py-4 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#175ddc] focus:ring-4 focus:ring-[#175ddc]/5 text-[#1d2736] text-sm font-semibold transition-all"
+                      className="w-full pl-5 pr-14 py-4 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#0d43af] focus:ring-4 focus:ring-[#0d43af]/5 text-[#1d2736] text-sm font-semibold transition-all"
                       placeholder="••••••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -160,7 +160,7 @@ const Login: React.FC = () => {
                     <button 
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#175ddc] transition-colors p-2"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#0d43af] transition-colors p-2"
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
@@ -170,7 +170,7 @@ const Login: React.FC = () => {
                 {/* Submit Button */}
                 <button 
                   type="submit" 
-                  className="w-full py-4 bg-[#175ddc] hover:bg-[#134db8] text-white font-bold rounded-xl transition-all text-sm tracking-widest uppercase shadow-xl shadow-blue-500/20 active:scale-[0.97] transform"
+                  className="w-full py-4 bg-[#0d43af] hover:bg-[#0a358a] text-white font-bold rounded-xl transition-all text-sm tracking-widest uppercase shadow-xl shadow-blue-500/20 active:scale-[0.97] transform"
                 >
                   {isLocked ? 'Unlock Vault' : 'Access Vault'}
                 </button>
@@ -224,7 +224,7 @@ const Login: React.FC = () => {
 
       {/* Footer Branding */}
       <footer className="py-4 text-center text-[10px] text-[#6b778c] leading-relaxed z-10">
-        <p className="hover:underline cursor-pointer font-medium hover:text-[#175ddc] transition-colors">
+        <p className="hover:underline cursor-pointer font-medium hover:text-[#11347a] transition-colors">
           Accessing vault.ldplogistics.com
         </p>
         <p className="mt-0.5">© 2026 LDP Logistics Inc.</p>

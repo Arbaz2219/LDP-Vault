@@ -32,16 +32,20 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <Layout>
-      <Routes>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/admin" element={<AdminConsole />} />
-        <Route path="/send" element={<Send />} />
-        <Route path="/tools" element={<Tools />} />
-        <Route path="/reports" element={<Reports />} />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </Layout>
+    <Routes>
+      <Route path="/admin" element={<AdminConsole />} />
+      <Route path="*" element={
+        <Layout>
+          <Routes>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/send" element={<Send />} />
+            <Route path="/tools" element={<Tools />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </Layout>
+      } />
+    </Routes>
   );
 };
 

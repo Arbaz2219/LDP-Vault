@@ -44,9 +44,9 @@ router.post('/register', async (req, res) => {
       },
     });
 
-    const token = jwt.sign({ userId: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '8h' });
+    const token = jwt.sign({ userId: user.id, email: user.email, role: user.role, portals: user.portals }, JWT_SECRET, { expiresIn: '8h' });
 
-    res.status(201).json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
+    res.status(201).json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role, portals: user.portals } });
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -68,9 +68,9 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '8h' });
+    const token = jwt.sign({ userId: user.id, email: user.email, role: user.role, portals: user.portals }, JWT_SECRET, { expiresIn: '8h' });
 
-    res.json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
+    res.json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role, portals: user.portals } });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -154,7 +154,8 @@ router.get('/microsoft/callback', async (req, res) => {
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role
+      role: user.role,
+      portals: user.portals
     }))}`);
 
   } catch (error: any) {

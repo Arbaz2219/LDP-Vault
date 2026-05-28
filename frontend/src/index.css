@@ -1,15 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --primary: #175ddc;
-  --primary-hover: #134db8;
-  --background: #f8f9fc;
+  --primary: #0d43af;             /* User Specified Blue */
+  --primary-hover: #0a358a;
+  --primary-light: #d9e2f3;
+  --background: #f4f6f9;          /* Slightly warmer light grey */
   --surface: #ffffff;
-  --text-primary: #2b394f;
-  --text-secondary: #677489;
-  --border: #e1e8f5;
-  --sidebar-bg: #1e2735;
-  --danger: #dc3545;
+  --text-primary: #1d2736;
+  --text-secondary: #5e6b7e;
+  --border: #e6ebf1;
+  --sidebar-bg: #f8f9fb;          /* Light sidebar like the Bitwarden image */
+  --sidebar-active: #d9e2f3;
+  --danger: #cf222e;
 }
 
 body {
@@ -22,7 +24,7 @@ body {
 }
 
 .btn-primary {
-  @apply bg-[#175ddc] hover:bg-[#134db8] text-white font-bold py-2.5 px-6 rounded transition-all uppercase text-xs tracking-wide shadow-sm;
+  @apply bg-[#0d43af] hover:bg-[#0a358a] text-white font-bold py-2.5 px-6 rounded transition-all uppercase text-xs tracking-wide shadow-sm;
 }
 
 .btn-secondary {
@@ -30,7 +32,7 @@ body {
 }
 
 .input-field {
-  @apply w-full px-4 py-2.5 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#175ddc] focus:border-[#175ddc] transition-all text-sm bg-white;
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#0d43af] focus:border-[#0d43af] transition-all text-sm bg-white;
 }
 .glass-card {
   @apply bg-white/70 backdrop-blur-2xl border border-white/40 shadow-[0_20px_50px_rgba(0,0,0,0.1)];
@@ -38,14 +40,14 @@ body {
 }
 
 .mesh-gradient {
-  background-color: #175ddc;
+  background-color: #0d43af;
   background-image: 
-    radial-gradient(at 0% 0%, hsla(218, 81%, 48%, 1) 0, transparent 50%), 
-    radial-gradient(at 50% 0%, hsla(210, 100%, 50%, 1) 0, transparent 50%), 
-    radial-gradient(at 100% 0%, hsla(220, 70%, 40%, 1) 0, transparent 50%), 
-    radial-gradient(at 0% 100%, hsla(215, 60%, 45%, 1) 0, transparent 50%), 
-    radial-gradient(at 50% 100%, hsla(225, 85%, 52%, 1) 0, transparent 50%), 
-    radial-gradient(at 100% 100%, hsla(230, 75%, 35%, 1) 0, transparent 50%);
+    radial-gradient(at 0% 0%, hsla(225, 85%, 35%, 1) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(220, 90%, 30%, 1) 0, transparent 50%), 
+    radial-gradient(at 100% 0%, hsla(230, 70%, 25%, 1) 0, transparent 50%), 
+    radial-gradient(at 0% 100%, hsla(215, 95%, 32%, 1) 0, transparent 50%), 
+    radial-gradient(at 50% 100%, hsla(225, 80%, 28%, 1) 0, transparent 50%), 
+    radial-gradient(at 100% 100%, hsla(235, 90%, 22%, 1) 0, transparent 50%);
   position: relative;
   overflow: hidden;
 }

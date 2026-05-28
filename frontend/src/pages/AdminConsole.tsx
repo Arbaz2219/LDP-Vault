@@ -15,9 +15,15 @@ import {
   Search,
   ChevronDown,
   LayoutGrid,
-  Info
+  Info,
+  Building2,
+  Lock,
+  ExternalLink,
+  ShieldCheck,
+  XCircle
 } from 'lucide-react';
 import LDPLogo from '../components/LDPLogo';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface Department {
   id: string;
@@ -33,21 +39,23 @@ interface Member {
   name: string;
   email: string;
   role: string;
-  status: string;
+  portals: string[];
+  createdAt: string;
 }
 
 const AdminConsole: React.FC = () => {
-  const { token } = useAuth();
-  const [activeTab, setActiveTab] = useState<'collections' | 'members' | 'groups' | 'settings'>('collections');
+  const { token, user: currentUser } = useAuth();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'collections' | 'members' | 'groups' | 'reporting' | 'integrations' | 'settings'>('collections');
   const [departments, setDepartments] = useState<Department[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
-  const [newDeptName, setNewDeptName] = useState('');
   const [orgName, setOrgName] = useState('LDP VAULT');
   const [isInviting, setIsInviting] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteName, setInviteName] = useState('');
   const [inviteRole, setInviteRole] = useState('USER');
   const [invitePassword, setInvitePassword] = useState('');
+  const [invitePortals, setInvitePortals] = useState<string[]>(['vault']);
   
   const [resetUserId, setResetUserId] = useState<string | null>(null);
   const [resetPassword, setResetPassword] = useState('');
@@ -86,6 +94,12 @@ const AdminConsole: React.FC = () => {
   };
 
   useEffect(() => {
+    if (currentUser && currentUser.role !== 'ADMIN' && !currentUser.portals?.includes('admin')) {
+      navigate('/dashboard');
+    }
+  }, [currentUser, navigate]);
+
+  useEffect(() => {
     if (token) {
       fetchDepartments();
       fetchMembers();
@@ -93,30 +107,16 @@ const AdminConsole: React.FC = () => {
     }
   }, [token]);
 
-  const handleSaveSettings = async () => {
-    try {
-      await api.patch('/api/org', { name: orgName }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('Settings saved successfully');
-    } catch (err) {
-      alert('Failed to save settings');
-    }
-  };
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!invitePassword || invitePassword.length < 6) {
-      alert('Password must be at least 6 characters');
-      return;
-    }
     try {
-      // Invite user to organization via dedicated route
       await api.post('/api/org/users', {
         email: inviteEmail,
         name: inviteName,
         password: invitePassword,
-        role: inviteRole
+        role: inviteRole,
+        portals: invitePortals
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -124,18 +124,30 @@ const AdminConsole: React.FC = () => {
       setInviteEmail('');
       setInviteName('');
       setInvitePassword('');
+      setInvitePortals(['vault']);
       fetchMembers();
     } catch (err) {
       alert('Failed to invite user');
     }
   };
 
+  const toggleUserPortal = async (userId: string, portal: string, currentPortals: string[]) => {
+    const newPortals = currentPortals.includes(portal)
+      ? currentPortals.filter(p => p !== portal)
+      : [...currentPortals, portal];
+    
+    try {
+      await api.patch(`/api/org/users/${userId}/portals`, { portals: newPortals }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchMembers();
+    } catch (err) {
+      alert('Failed to update portal access');
+    }
+  };
+
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!resetPassword || resetPassword.length < 6) {
-      alert('Password must be at least 6 characters');
-      return;
-    }
     try {
       await api.post(`/api/org/users/${resetUserId}/reset-password`, {
         newPassword: resetPassword
@@ -150,22 +162,9 @@ const AdminConsole: React.FC = () => {
     }
   };
 
-  const handleCreateDept = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await api.post('/api/org/departments', { name: newDeptName }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setNewDeptName('');
-      fetchDepartments();
-    } catch (err) {
-      alert('Failed to create department. Admins only.');
-    }
-  };
-
   const navItems = [
     { id: 'collections', label: 'Collections', icon: <Layers size={18} /> },
-    { id: 'members', label: 'Members', icon: <UserPlus size={18} /> },
+    { id: 'members', label: 'Members', icon: <Users size={18} /> },
     { id: 'groups', label: 'Groups', icon: <Users size={18} /> },
     { id: 'reporting', label: 'Reporting', icon: <BarChart2 size={18} /> },
     { id: 'integrations', label: 'Integrations', icon: <Puzzle size={18} /> },
@@ -173,316 +172,399 @@ const AdminConsole: React.FC = () => {
   ];
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-white">
-      {/* Header */}
-      <div className="flex items-center justify-between px-8 py-4 border-b border-gray-100">
-           <LDPLogo className="h-14 w-auto" />
-        <div className="flex items-center gap-4">
-           <button className="bg-[#175ddc] hover:bg-[#134db8] text-white px-4 py-1.5 rounded flex items-center gap-2 text-sm font-bold shadow-sm transition-colors">
-              <Plus size={16} />
-              New
-              <ChevronDown size={14} className="opacity-60" />
-           </button>
-           <button className="p-2 text-gray-400 hover:text-gray-600 border border-gray-200 rounded">
-             <LayoutGrid size={18} />
-           </button>
-           <div className="w-8 h-8 rounded-full bg-[#175ddc] flex items-center justify-center text-white font-bold text-xs">
-             HE
+    <div className="flex h-screen bg-white font-sans text-[#1d2736]">
+      {/* Sidebar Overlay for Mobile */}
+      
+      {/* Sidebar - Light Bitwarden Style */}
+      <aside className="w-[280px] bg-[#f8f9fb] border-r border-[#e6ebf1] flex flex-col z-20">
+        <div className="p-8 pb-10">
+          <Link to="/dashboard" className="flex items-center gap-2 group">
+            <LDPLogo className="h-10 w-auto" hideText={true} />
+            <div className="flex flex-col">
+               <span className="text-xl font-black text-[#0d43af] tracking-tight leading-none">LDP Vault</span>
+               <span className="text-[10px] font-bold text-[#5e6b7e] uppercase tracking-widest mt-0.5">Admin Console</span>
+            </div>
+          </Link>
+        </div>
+
+        <nav className="flex-1 px-4 space-y-1">
+          <div className="px-4 py-2 mb-2 flex items-center justify-between group cursor-pointer hover:bg-gray-100/50 rounded-lg transition-colors">
+            <div className="flex items-center gap-3">
+               <Building2 size={18} className="text-[#5e6b7e]" />
+               <span className="text-sm font-bold text-[#1d2736]">{orgName}</span>
+            </div>
+            <ChevronDown size={14} className="text-[#5e6b7e] opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id as any)}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all ${
+                activeTab === item.id 
+                ? 'bg-[#d9e2f3] text-[#0d43af]' 
+                : 'text-[#5e6b7e] hover:bg-gray-100 hover:text-[#1d2736]'
+              }`}
+            >
+              <span className={activeTab === item.id ? 'text-[#0d43af]' : 'text-[#5e6b7e]'}>
+                {item.icon}
+              </span>
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        {/* Portal Switcher at Bottom */}
+        <div className="p-4 mt-auto border-t border-[#e6ebf1] space-y-2">
+           <Link 
+             to="/dashboard"
+             className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-[#5e6b7e] hover:bg-gray-100 rounded-xl transition-all"
+           >
+              <div className="p-1.5 bg-gray-100 rounded-lg group-hover:bg-white transition-colors">
+                <Lock size={16} />
+              </div>
+              Password Manager
+           </Link>
+           <div className="w-full flex items-center gap-3 px-4 py-3 text-sm font-black text-[#0d43af] bg-[#d9e2f3] rounded-xl shadow-sm">
+              <div className="p-1.5 bg-[#0d43af] text-white rounded-lg">
+                <Shield size={16} />
+              </div>
+              Admin Console
            </div>
         </div>
-      </div>
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* Admin Sub-Sidebar */}
-        <div className="w-64 bg-[#f8f9fc] border-r border-gray-200 overflow-y-auto px-4 py-6">
-          <div className="space-y-1">
-            <div className="flex items-center gap-3 px-3 py-2 text-gray-600 text-sm font-medium cursor-pointer hover:bg-gray-100 rounded">
-              <Globe size={18} /> LDP VAULT
-            </div>
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id as any)}
-                className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded transition-colors ${
-                  activeTab === item.id ? 'bg-[#d9e2f3] text-[#175ddc]' : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                {item.icon}
-                {item.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-auto pt-40 space-y-2">
-            <div className="flex items-center gap-3 px-3 py-2 text-gray-400 text-sm font-medium">
-               <Shield size={18} /> Password Manager
-            </div>
-            <div className="flex items-center gap-3 px-3 py-2 bg-[#d9e2f3] text-[#175ddc] text-sm font-medium rounded">
-               <Layers size={18} /> Admin Console
-            </div>
-          </div>
+        <div className="p-6 text-[10px] text-[#5e6b7e] font-medium opacity-60">
+           More from LDP Vault
         </div>
+      </aside>
 
-        {/* Main Admin View */}
-        <div className="flex-1 flex flex-col overflow-hidden px-8 py-8">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-800">
-              LDP VAULT {activeTab === 'collections' ? 'collections' : activeTab}
-            </h2>
-          </div>
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col overflow-hidden">
+        {/* Header Bar */}
+        <header className="h-20 bg-white border-b border-[#e6ebf1] flex items-center justify-between px-10 shrink-0">
+           <div className="flex items-center gap-4">
+              <h1 className="text-xl font-bold text-[#1d2736]">
+                {orgName} {activeTab === 'collections' ? 'collections' : activeTab}
+              </h1>
+           </div>
 
-          {/* Filters Bar */}
-          <div className="flex gap-8 mb-6">
-            <div className="w-64 space-y-6">
-               <div className="space-y-4">
-                  <div className="flex items-center justify-between group cursor-pointer">
-                    <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Filters</h3>
-                    <Info size={14} className="text-gray-300" />
-                  </div>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input 
-                      type="text" 
-                      placeholder={`Search ${activeTab}`} 
-                      className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded focus:border-blue-500 text-sm outline-none"
-                    />
-                  </div>
-               </div>
-               
-               <div className="space-y-1">
-                  <div className="flex items-center gap-3 px-2 py-1.5 rounded bg-blue-50 text-blue-700 font-medium text-sm cursor-pointer">
-                    <ChevronDown size={14} /> All items
-                  </div>
-                  <div className="flex items-center gap-3 px-2 py-1.5 rounded hover:bg-gray-50 text-gray-600 text-sm cursor-pointer ml-4">
-                    <Globe size={14} /> Login
-                  </div>
-                  <div className="flex items-center gap-3 px-2 py-1.5 rounded hover:bg-gray-50 text-gray-600 text-sm cursor-pointer ml-4">
-                    <Layers size={14} /> Collections
-                  </div>
-               </div>
-            </div>
-
-            {/* List View */}
-            <div className="flex-1">
-              <div className="flex items-center gap-4 mb-2 pb-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100">
-                <input type="checkbox" className="rounded" />
-                <div className="flex-1">Name</div>
-                {activeTab === 'collections' ? (
-                  <>
-                    <div className="w-32">Groups</div>
-                    <div className="w-32">Permission</div>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-48">Groups</div>
-                    <div className="w-32">Permission</div>
-                  </>
-                )}
-                <div className="w-10"></div>
+           <div className="flex items-center gap-4">
+              <button className="h-10 px-5 bg-[#0d43af] hover:bg-[#0a358a] text-white rounded-lg flex items-center gap-2 text-sm font-bold shadow-lg shadow-blue-500/10 transition-all active:scale-95">
+                 <Plus size={18} />
+                 New
+                 <div className="w-px h-4 bg-white/20 ml-1"></div>
+                 <ChevronDown size={14} className="opacity-70" />
+              </button>
+              
+              <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-lg border border-[#e6ebf1]">
+                 <button className="p-2 text-[#5e6b7e] hover:bg-white hover:text-[#0d43af] hover:shadow-sm rounded-md transition-all">
+                    <LayoutGrid size={18} />
+                 </button>
+                 <button className="p-2 bg-white text-[#0d43af] shadow-sm rounded-md">
+                    <Layers size={18} />
+                 </button>
               </div>
 
-              <div className="divide-y divide-gray-100">
-                {activeTab === 'collections' ? (
-                  <>
-                    {departments.map((dept) => (
-                      <div key={dept.id} className="flex items-center gap-4 py-3 hover:bg-gray-50 group px-2 rounded cursor-pointer">
-                        <input type="checkbox" className="rounded" />
-                        <div className="w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-400">
-                          <Layers size={16} />
-                        </div>
-                        <div className="flex-1 font-bold text-gray-800 text-sm">{dept.name}</div>
-                        <div className="w-32 flex gap-1">
-                          <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">Admin</span>
-                        </div>
-                        <div className="w-32 text-blue-600 text-xs font-medium hover:underline">Edit items</div>
-                        <div className="w-10 flex justify-end">
-                          <MoreVertical size={16} className="text-gray-300" />
-                        </div>
-                      </div>
-                    ))}
-                    <div className="mt-8 p-6 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                      <h3 className="text-sm font-bold text-gray-800 mb-4">Create New Collection</h3>
-                      <form onSubmit={handleCreateDept} className="flex gap-3">
-                        <input 
-                          type="text" 
-                          placeholder="Collection Name" 
-                          className="input-field max-w-sm"
-                          value={newDeptName}
-                          onChange={e => setNewDeptName(e.target.value)}
-                        />
-                        <button type="submit" className="bg-[#175ddc] text-white px-6 py-2 rounded font-bold hover:bg-[#134db8]">
-                          Create
-                        </button>
-                      </form>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0d43af] to-[#2563eb] flex items-center justify-center text-white font-black text-xs shadow-md">
+                {currentUser?.name?.[0]?.toUpperCase() || 'A'}
+              </div>
+           </div>
+        </header>
+
+        {/* Content Section */}
+        <div className="flex-1 overflow-y-auto p-10 bg-white">
+           <div className="flex gap-10">
+              {/* Left Column: Filters */}
+              <div className="w-72 shrink-0 space-y-8">
+                 <div className="bg-white rounded-2xl border border-[#e6ebf1] shadow-sm overflow-hidden">
+                    <div className="p-5 border-b border-[#e6ebf1] flex items-center justify-between">
+                       <h3 className="text-xs font-black text-[#5e6b7e] uppercase tracking-widest">Filters</h3>
+                       <Info size={14} className="text-[#5e6b7e]" />
                     </div>
-                  </>
-                ) : activeTab === 'members' ? (
-                  <>
-                    <div className="flex justify-between items-center mb-6">
-                       <p className="text-sm text-gray-500">Manage users who have access to this organization.</p>
+                    <div className="p-5 space-y-5">
+                       <div className="relative group">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5e6b7e] w-4 h-4 group-focus-within:text-[#11347a] transition-colors" />
+                          <input 
+                            type="text" 
+                            placeholder={`Search ${activeTab}...`} 
+                            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-[#e6ebf1] rounded-xl focus:bg-white focus:border-[#11347a] focus:ring-4 focus:ring-[#11347a]/5 text-sm outline-none transition-all placeholder:text-[#5e6b7e]/50 font-medium"
+                          />
+                       </div>
+
+                       <div className="space-y-1">
+                          <button className="w-full flex items-center gap-3 px-3 py-2 bg-[#d9e2f3] text-[#11347a] rounded-lg text-sm font-bold">
+                             <ChevronDown size={14} /> All items
+                          </button>
+                          <button className="w-full flex items-center gap-3 px-3 py-2 text-[#5e6b7e] hover:bg-gray-50 rounded-lg text-sm font-semibold pl-8">
+                             <Globe size={14} /> Login
+                          </button>
+                          <button className="w-full flex items-center gap-3 px-3 py-2 text-[#5e6b7e] hover:bg-gray-50 rounded-lg text-sm font-semibold pl-8">
+                             <Lock size={14} /> Secret
+                          </button>
+                          <button className="w-full flex items-center gap-3 px-3 py-2 text-[#5e6b7e] hover:bg-gray-50 rounded-lg text-sm font-semibold text-left">
+                             <Layers size={14} className="mr-1" /> Collections
+                          </button>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+
+              {/* Right Column: Portal/Content Tables */}
+              <div className="flex-1 min-w-0">
+                 {activeTab === 'members' && (
+                    <div className="mb-6 flex items-center justify-between">
+                       <div>
+                          <h2 className="text-sm font-bold text-[#1d2736]">Organization Members</h2>
+                          <p className="text-xs text-[#5e6b7e] mt-1">Manage users and their portal access levels.</p>
+                       </div>
                        <button 
                          onClick={() => setIsInviting(true)}
-                         className="bg-[#175ddc] text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2"
+                         className="h-10 px-6 bg-[#11347a] hover:bg-[#0a2150] text-white rounded-xl text-xs font-black tracking-widest uppercase flex items-center gap-2 transition-all shadow-md shadow-blue-500/10"
                        >
                          <UserPlus size={16} /> Invite Member
                        </button>
                     </div>
-                    {members.map((member) => (
-                      <div key={member.id} className="flex items-center gap-4 py-3 hover:bg-gray-50 group px-2 rounded cursor-pointer">
-                        <input type="checkbox" className="rounded" />
-                        <div className="w-8 h-8 rounded bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
-                          {member.name[0]}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-bold text-gray-800 text-sm">{member.name}</p>
-                          <p className="text-xs text-gray-400">{member.email}</p>
-                        </div>
-                        <div className="w-48 text-xs text-gray-500">None</div>
-                        <div className="w-32 text-xs text-gray-500">
-                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${member.role === 'Admin' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>
-                             {member.role}
-                           </span>
-                        </div>
-                        <div className="w-10 flex justify-end relative group/menu">
-                          <MoreVertical size={16} className="text-gray-300 cursor-pointer" />
-                          <div className="hidden group-hover/menu:block absolute right-0 top-full mt-1 w-36 bg-white border border-gray-100 shadow-lg rounded py-1 z-10">
-                            <button 
-                              onClick={() => setResetUserId(member.id)}
-                              className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50"
-                            >
-                              Reset Password
-                            </button>
+                 )}
+
+                 {/* Custom Table Header */}
+                 <div className="flex items-center gap-4 py-3 border-b border-[#e6ebf1] text-[10px] font-black text-[#5e6b7e] uppercase tracking-[0.15em] px-4">
+                    <input type="checkbox" className="w-4 h-4 rounded border-[#e6ebf1] text-[#11347a] focus:ring-[#11347a]" />
+                    <div className="flex-1">Name / Status</div>
+                    {activeTab === 'members' ? (
+                       <>
+                          <div className="w-48">Portal Access</div>
+                          <div className="w-32">Role</div>
+                          <div className="w-32 text-right">Joined</div>
+                       </>
+                    ) : (
+                       <>
+                          <div className="w-48">Groups</div>
+                          <div className="w-32 text-right">Permission</div>
+                       </>
+                    )}
+                    <div className="w-10"></div>
+                 </div>
+
+                 {/* List Container */}
+                 <div className="divide-y divide-gray-50">
+                    {activeTab === 'collections' ? (
+                       <>
+                          {departments.map((dept) => (
+                             <div key={dept.id} className="flex items-center gap-4 py-4 px-4 hover:bg-[#f8f9fb] transition-colors group cursor-pointer">
+                                <input type="checkbox" className="w-4 h-4 rounded border-[#e6ebf1] text-[#11347a]" />
+                                <div className="w-10 h-10 rounded-xl border border-[#e6ebf1] bg-white flex items-center justify-center text-[#5e6b7e] shadow-sm">
+                                   <Layers size={18} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                   <p className="font-bold text-[#1d2736] text-sm truncate">{dept.name}</p>
+                                   <p className="text-[10px] text-[#5e6b7e] font-semibold uppercase tracking-wider mt-0.5">
+                                      {dept._count.users} Users • {dept._count.vaultItems} Items
+                                   </p>
+                                </div>
+                                <div className="w-48 flex items-center gap-2">
+                                   <span className="px-3 py-1 bg-gray-100 text-[#5e6b7e] rounded-full text-[10px] font-black uppercase tracking-wider">Unassigned</span>
+                                </div>
+                                <div className="w-32 text-right">
+                                   <span className="text-[#11347a] text-xs font-bold hover:underline">Edit Permission</span>
+                                </div>
+                                <div className="w-10 flex justify-end">
+                                   <button className="p-2 text-[#e6ebf1] hover:text-[#5e6b7e] rounded-lg transition-colors">
+                                      <MoreVertical size={18} />
+                                   </button>
+                                </div>
+                             </div>
+                          ))}
+                       </>
+                    ) : activeTab === 'members' ? (
+                       <>
+                          {members.map((member) => (
+                             <div key={member.id} className="flex items-center gap-4 py-5 px-4 hover:bg-[#f8f9fb] transition-colors group">
+                                <input type="checkbox" className="w-4 h-4 rounded border-[#e6ebf1] text-[#11347a]" />
+                                <div className="w-10 h-10 rounded-xl bg-[#d9e2f3] text-[#11347a] flex items-center justify-center font-black text-sm shadow-sm ring-1 ring-white">
+                                   {member.name[0]?.toUpperCase()}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                   <div className="flex items-center gap-2">
+                                      <p className="font-bold text-[#1d2736] text-sm truncate">{member.name}</p>
+                                      {member.role === 'ADMIN' && <ShieldCheck size={14} className="text-[#11347a]" />}
+                                   </div>
+                                   <p className="text-xs text-[#5e6b7e] font-medium truncate">{member.email}</p>
+                                </div>
+                                <div className="w-48 flex items-center gap-3">
+                                   {/* Portal Access Controls */}
+                                   <button 
+                                     onClick={() => toggleUserPortal(member.id, 'vault', member.portals || [])}
+                                     className={`p-1.5 rounded-lg transition-all ${member.portals?.includes('vault') ? 'bg-[#d9e2f3] text-[#11347a]' : 'bg-gray-50 text-gray-300'}`}
+                                     title="Vault Access"
+                                   >
+                                      <Lock size={14} />
+                                   </button>
+                                   <button 
+                                     onClick={() => toggleUserPortal(member.id, 'admin', member.portals || [])}
+                                     className={`p-1.5 rounded-lg transition-all ${member.portals?.includes('admin') ? 'bg-[#11347a] text-white shadow-sm' : 'bg-gray-50 text-gray-300'}`}
+                                     title="Admin Access"
+                                   >
+                                      <Shield size={14} />
+                                   </button>
+                                   <button 
+                                     className="p-1.5 bg-gray-50 text-gray-200 rounded-lg cursor-not-allowed"
+                                     title="Secrets Manager (Enterprise Only)"
+                                   >
+                                      <Puzzle size={14} />
+                                   </button>
+                                </div>
+                                <div className="w-32">
+                                   <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${member.role === 'ADMIN' ? 'bg-indigo-50 text-indigo-700' : 'bg-gray-50 text-[#5e6b7e]'}`}>
+                                      {member.role === 'ADMIN' ? 'Executive' : 'Member'}
+                                   </span>
+                                </div>
+                                <div className="w-32 text-right text-[10px] font-bold text-[#5e6b7e] opacity-60 uppercase">
+                                   {new Date(member.createdAt).toLocaleDateString()}
+                                </div>
+                                <div className="w-10 flex justify-end relative group/menu">
+                                   <button className="p-2 text-[#e6ebf1] hover:text-[#5e6b7e] rounded-lg transition-colors">
+                                      <MoreVertical size={18} />
+                                   </button>
+                                   <div className="hidden group-hover/menu:block absolute right-0 top-full mt-1 w-48 bg-white border border-[#e6ebf1] shadow-2xl rounded-2xl p-2 z-50">
+                                      <button 
+                                        onClick={() => navigate(`/members/${member.id}`)}
+                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-[#1d2736] hover:bg-gray-50 rounded-xl"
+                                      >
+                                         <ExternalLink size={14} /> View Details
+                                      </button>
+                                      <button 
+                                        onClick={() => setResetUserId(member.id)}
+                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-[#1d2736] hover:bg-gray-50 rounded-xl"
+                                      >
+                                         <Lock size={14} /> Reset Master Password
+                                      </button>
+                                      <div className="h-px bg-gray-100 my-1 mx-2"></div>
+                                      <button 
+                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl"
+                                      >
+                                         <XCircle size={14} /> Remove Member
+                                      </button>
+                                   </div>
+                                </div>
+                             </div>
+                          ))}
+                       </>
+                    ) : (
+                       <div className="flex flex-col items-center justify-center py-40 bg-gray-50/30 rounded-3xl border-2 border-dashed border-gray-100 mt-4">
+                          <div className="p-4 bg-white rounded-2xl shadow-sm mb-4">
+                             <BarChart2 size={32} className="text-[#e6ebf1]" />
                           </div>
-                        </div>
-                      </div>
-                    ))}
-                  </>
-                ) : activeTab === 'settings' ? (
-                  <div className="max-w-2xl space-y-8">
-                     <div>
-                        <h3 className="text-lg font-bold text-gray-800 mb-4">Organization Settings</h3>
-                        <div className="space-y-4">
-                           <div>
-                              <label className="text-xs font-bold text-gray-500 uppercase">Organization Name</label>
-                              <input 
-                                type="text" 
-                                className="input-field mt-1" 
-                                value={orgName} 
-                                onChange={e => setOrgName(e.target.value)}
-                              />
-                           </div>
-                           <div>
-                              <label className="text-xs font-bold text-gray-500 uppercase">Billing Email</label>
-                              <input type="email" className="input-field mt-1" defaultValue="help-desk@ldplogistics.com" disabled />
-                           </div>
-                        </div>
-                     </div>
-                     
-                     <div className="pt-8 border-t border-gray-100">
-                        <h3 className="text-lg font-bold text-gray-800 mb-4">Security Policies</h3>
-                        <div className="space-y-4">
-                           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                              <div>
-                                 <p className="font-bold text-gray-800 text-sm">Two-step Login</p>
-                                 <p className="text-xs text-gray-500">Require all members to use two-step login.</p>
-                              </div>
-                              <div className="w-12 h-6 bg-blue-600 rounded-full relative">
-                                 <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
-                              </div>
-                           </div>
-                           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                              <div>
-                                 <p className="font-bold text-gray-800 text-sm">Master Password Complexity</p>
-                                 <p className="text-xs text-gray-500">Enforce strong master passwords.</p>
-                              </div>
-                              <div className="w-12 h-6 bg-blue-600 rounded-full relative">
-                                 <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-                     
-                     <button 
-                       onClick={handleSaveSettings}
-                       className="bg-[#175ddc] text-white px-6 py-2 rounded font-bold hover:bg-[#134db8]"
-                     >
-                        Save Settings
-                     </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-20 text-gray-300">
-                    <p>This section is coming soon.</p>
-                  </div>
-                )}
+                          <p className="text-sm font-bold text-[#5e6b7e]">Module: {activeTab}</p>
+                          <p className="text-xs text-[#5e6b7e]/60 mt-2 font-medium">This administrative module is under development.</p>
+                       </div>
+                    )}
+                 </div>
               </div>
-            </div>
-          </div>
+           </div>
         </div>
-      </div>
-      {/* Invite Member Modal */}
+      </main>
+
+      {/* Modals & Overlays */}
       {isInviting && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] backdrop-blur-sm">
-           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
-              <div className="flex items-center gap-3 mb-6">
-                 <UserPlus className="text-[#175ddc]" size={24} />
-                 <h2 className="text-xl font-bold text-gray-800">Invite New Member</h2>
+        <div className="fixed inset-0 bg-[#0b1a30]/40 flex items-center justify-center z-[100] backdrop-blur-md animate-in fade-in duration-300">
+           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl p-10 overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#11347a] to-[#2563eb]"></div>
+              
+              <div className="flex items-center gap-4 mb-10">
+                 <div className="w-14 h-14 bg-blue-50 text-[#11347a] rounded-2xl flex items-center justify-center shadow-inner">
+                    <UserPlus size={28} />
+                 </div>
+                 <div>
+                    <h2 className="text-2xl font-black text-[#1d2736] tracking-tight">Invite Member</h2>
+                    <p className="text-sm text-[#5e6b7e] font-medium">Add a new professional to your organization.</p>
+                 </div>
               </div>
-              <form onSubmit={handleInvite} className="space-y-4">
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase">Name</label>
-                    <input 
-                      type="text" 
-                      className="input-field mt-1" 
-                      value={inviteName}
-                      onChange={e => setInviteName(e.target.value)}
-                      required
-                    />
+
+              <form onSubmit={handleInvite} className="space-y-6">
+                 <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-[#5e6b7e] uppercase tracking-[0.2em] ml-1">Full Name</label>
+                       <input 
+                         type="text" 
+                         className="w-full px-5 py-3.5 bg-gray-50 border border-[#e6ebf1] rounded-2xl focus:bg-white focus:border-[#11347a] focus:ring-4 focus:ring-[#11347a]/5 text-sm outline-none transition-all font-semibold" 
+                         value={inviteName}
+                         onChange={e => setInviteName(e.target.value)}
+                         required
+                       />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-[#5e6b7e] uppercase tracking-[0.2em] ml-1">Work Email</label>
+                       <input 
+                         type="email" 
+                         className="w-full px-5 py-3.5 bg-gray-50 border border-[#e6ebf1] rounded-2xl focus:bg-white focus:border-[#11347a] focus:ring-4 focus:ring-[#11347a]/5 text-sm outline-none transition-all font-semibold" 
+                         value={inviteEmail}
+                         onChange={e => setInviteEmail(e.target.value)}
+                         required
+                       />
+                    </div>
                  </div>
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase">Email</label>
-                    <input 
-                      type="email" 
-                      className="input-field mt-1" 
-                      value={inviteEmail}
-                      onChange={e => setInviteEmail(e.target.value)}
-                      required
-                    />
+
+                 <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-[#5e6b7e] uppercase tracking-[0.2em] ml-1">Assigned Role</label>
+                       <select 
+                         className="w-full px-5 py-3.5 bg-gray-50 border border-[#e6ebf1] rounded-2xl focus:bg-white focus:border-[#11347a] focus:ring-4 focus:ring-[#11347a]/5 text-sm outline-none transition-all font-bold appearance-none cursor-pointer"
+                         value={inviteRole}
+                         onChange={e => setInviteRole(e.target.value)}
+                       >
+                          <option value="USER">Member</option>
+                          <option value="ADMIN">Executive / Admin</option>
+                       </select>
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-[#5e6b7e] uppercase tracking-[0.2em] ml-1">Master Password</label>
+                       <input 
+                         type="text" 
+                         className="w-full px-5 py-3.5 bg-gray-50 border border-[#e6ebf1] rounded-2xl focus:bg-white focus:border-[#11347a] focus:ring-4 focus:ring-[#11347a]/5 text-sm outline-none transition-all font-semibold" 
+                         value={invitePassword}
+                         placeholder="Minimum 6 characters"
+                         onChange={e => setInvitePassword(e.target.value)}
+                         required
+                         minLength={6}
+                       />
+                    </div>
                  </div>
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase">Role</label>
-                    <select 
-                      className="input-field mt-1"
-                      value={inviteRole}
-                      onChange={e => setInviteRole(e.target.value)}
-                    >
-                       <option value="USER">User</option>
-                       <option value="ADMIN">Admin</option>
-                    </select>
+
+                 <div className="space-y-3">
+                    <label className="text-[10px] font-black text-[#5e6b7e] uppercase tracking-[0.2em] ml-1">Initial Portal Access</label>
+                    <div className="flex gap-4">
+                       <button 
+                         type="button"
+                         onClick={() => setInvitePortals(prev => prev.includes('vault') ? prev.filter(p => p !== 'vault') : [...prev, 'vault'])}
+                         className={`flex-1 p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${invitePortals.includes('vault') ? 'border-[#11347a] bg-[#11347a]/5' : 'border-[#e6ebf1] hover:border-gray-300'}`}
+                       >
+                          <Lock size={20} className={invitePortals.includes('vault') ? 'text-[#11347a]' : 'text-gray-300'} />
+                          <span className="text-[10px] font-black uppercase tracking-widest text-[#1d2736]">Password Vault</span>
+                       </button>
+                       <button 
+                         type="button"
+                         onClick={() => setInvitePortals(prev => prev.includes('admin') ? prev.filter(p => p !== 'admin') : [...prev, 'admin'])}
+                         className={`flex-1 p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${invitePortals.includes('admin') ? 'border-[#11347a] bg-[#11347a]/5' : 'border-[#e6ebf1] hover:border-gray-300'}`}
+                       >
+                          <Shield size={20} className={invitePortals.includes('admin') ? 'text-[#11347a]' : 'text-gray-300'} />
+                          <span className="text-[10px] font-black uppercase tracking-widest text-[#1d2736]">Admin Panel</span>
+                       </button>
+                    </div>
                  </div>
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase">Initial Password</label>
-                    <input 
-                      type="text" 
-                      className="input-field mt-1" 
-                      value={invitePassword}
-                      onChange={e => setInvitePassword(e.target.value)}
-                      required
-                      minLength={6}
-                    />
-                 </div>
-                 <div className="flex gap-3 mt-8">
+
+                 <div className="flex gap-4 mt-12">
                     <button 
                       type="button"
                       onClick={() => setIsInviting(false)}
-                      className="flex-1 px-4 py-2 text-gray-600 font-bold hover:bg-gray-50 rounded"
+                      className="flex-1 px-8 py-4 text-sm font-black text-[#5e6b7e] hover:bg-gray-50 rounded-2xl transition-all uppercase tracking-widest"
                     >
                       Cancel
                     </button>
                     <button 
                       type="submit"
-                      className="flex-1 bg-[#175ddc] text-white font-bold py-2 rounded hover:bg-[#134db8]"
+                      className="flex-[2] bg-[#11347a] hover:bg-[#0a2150] text-white font-black py-4 rounded-2xl transition-all uppercase tracking-[0.2em] text-xs shadow-xl shadow-blue-500/20 active:scale-[0.98]"
                     >
-                      Send Invite
+                      Send Invitation
                     </button>
                  </div>
               </form>
@@ -490,39 +572,36 @@ const AdminConsole: React.FC = () => {
         </div>
       )}
 
-      {/* Reset Password Modal */}
+      {/* Reset Password Modal (Simplified for local) */}
       {resetUserId && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] backdrop-blur-sm">
-           <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-8">
-              <div className="flex items-center gap-3 mb-6">
-                 <Shield className="text-[#175ddc]" size={24} />
-                 <h2 className="text-xl font-bold text-gray-800">Reset Password</h2>
-              </div>
-              <form onSubmit={handleResetPassword} className="space-y-4">
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase">New Password</label>
+        <div className="fixed inset-0 bg-[#0b1a30]/40 flex items-center justify-center z-[100] backdrop-blur-md">
+           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-10">
+              <h2 className="text-xl font-black text-[#1d2736] mb-6 tracking-tight">Reset Master Password</h2>
+              <form onSubmit={handleResetPassword} className="space-y-6">
+                 <div className="space-y-2">
+                    <label className="text-[10px] font-black text-[#5e6b7e] uppercase tracking-[0.2em]">New Password</label>
                     <input 
                       type="text" 
-                      className="input-field mt-1" 
+                      className="w-full px-5 py-4 bg-gray-50 border border-[#e6ebf1] rounded-2xl focus:border-[#11347a] outline-none font-bold" 
                       value={resetPassword}
                       onChange={e => setResetPassword(e.target.value)}
                       required
                       minLength={6}
                     />
                  </div>
-                 <div className="flex gap-3 mt-8">
+                 <div className="flex gap-4">
                     <button 
                       type="button"
                       onClick={() => setResetUserId(null)}
-                      className="flex-1 px-4 py-2 text-gray-600 font-bold hover:bg-gray-50 rounded"
+                      className="flex-1 py-4 text-xs font-black uppercase tracking-widest text-[#5e6b7e]"
                     >
                       Cancel
                     </button>
                     <button 
                       type="submit"
-                      className="flex-1 bg-[#175ddc] text-white font-bold py-2 rounded hover:bg-[#134db8]"
+                      className="flex-[2] bg-[#11347a] text-white font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-xs"
                     >
-                      Reset
+                      Update Password
                     </button>
                  </div>
               </form>

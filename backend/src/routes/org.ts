@@ -92,7 +92,7 @@ router.get('/users', authenticateJWT, isAdmin, async (req: AuthRequest, res) => 
     const user = await prisma.user.findUnique({ where: { id: req.user?.userId } });
     const users = await prisma.user.findMany({
       where: { organizationId: user?.organizationId },
-      select: { id: true, name: true, email: true, role: true, createdAt: true }
+      select: { id: true, name: true, email: true, role: true, portals: true, createdAt: true }
     });
     res.json(users);
   } catch (error) {
@@ -103,7 +103,7 @@ router.get('/users', authenticateJWT, isAdmin, async (req: AuthRequest, res) => 
 // Create user in organization (Admin only)
 router.post('/users', authenticateJWT, isAdmin, async (req: AuthRequest, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, portals } = req.body;
     const adminUser = await prisma.user.findUnique({ where: { id: req.user?.userId } });
     
     if (!adminUser?.organizationId) return res.status(400).json({ error: 'Admin not in organization' });
@@ -119,7 +119,8 @@ router.post('/users', authenticateJWT, isAdmin, async (req: AuthRequest, res) =>
         email,
         masterPasswordHash: hashedPassword,
         role: role || 'USER',
-        organizationId: adminUser.organizationId
+        organizationId: adminUser.organizationId,
+        portals: portals || ['vault']
       }
     });
 
@@ -158,6 +159,34 @@ router.post('/users/:userId/reset-password', authenticateJWT, isAdmin, async (re
     });
 
     res.json({ message: 'Password reset successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update user portals (Admin only)
+router.patch('/users/:userId/portals', authenticateJWT, isAdmin, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.params.userId as string;
+    const { portals } = req.body;
+    
+    if (!Array.isArray(portals)) {
+      return res.status(400).json({ error: 'Portals must be an array' });
+    }
+
+    const adminUser = await prisma.user.findUnique({ where: { id: req.user?.userId } });
+    const targetUser = await prisma.user.findUnique({ where: { id: userId } });
+
+    if (!targetUser || targetUser.organizationId !== adminUser?.organizationId) {
+      return res.status(404).json({ error: 'User not found in your organization' });
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { portals }
+    });
+
+    res.json({ message: 'Portals updated successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }

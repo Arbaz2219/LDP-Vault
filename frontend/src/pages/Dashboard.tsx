@@ -410,7 +410,7 @@ const Dashboard: React.FC = () => {
           <div className="relative">
             <button 
               onClick={() => setShowNewMenu(!showNewMenu)}
-              className="bg-[#175ddc] hover:bg-[#134db8] text-white px-4 py-1.5 rounded flex items-center gap-2 text-sm font-bold shadow-sm transition-colors"
+              className="bg-[#0d43af] hover:bg-[#0a358a] text-white px-4 py-1.5 rounded flex items-center gap-2 text-sm font-bold shadow-sm transition-colors"
             >
               <Plus size={16} />
               New
@@ -439,7 +439,7 @@ const Dashboard: React.FC = () => {
           <button className="p-2 text-gray-400 hover:text-gray-600 border border-gray-200 rounded">
             <LayoutGrid size={18} />
           </button>
-          <div className="w-8 h-8 rounded-full bg-[#175ddc] flex items-center justify-center text-white font-bold text-xs">
+          <div className="w-8 h-8 rounded-full bg-[#0d43af] flex items-center justify-center text-white font-bold text-xs">
             {user?.name?.[0].toUpperCase()}
           </div>
         </div>
@@ -611,7 +611,7 @@ const Dashboard: React.FC = () => {
 
           {loading ? (
             <div className="flex items-center justify-center h-48">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#175ddc]"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0d43af]"></div>
             </div>
           ) : filteredItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-gray-300">

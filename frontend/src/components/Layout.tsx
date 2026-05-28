@@ -17,12 +17,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { logout, lock, user } = useAuth();
   const location = useLocation();
 
-  const isAdmin = user?.role === 'ADMIN';
+  const isAdmin = user?.role === 'ADMIN' || user?.portals?.includes('admin');
 
   return (
     <div className="flex h-screen bg-white overflow-hidden font-sans">
       {/* Sidebar */}
-      <aside className="w-64 bg-[#175ddc] flex flex-col shrink-0 relative overflow-hidden">
+      <aside className="w-64 bg-[#0d43af] flex flex-col shrink-0 relative overflow-hidden">
         {/* Sidebar background decorative blobs */}
         <div className="absolute top-[-10%] left-[-20%] w-48 h-48 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-48 h-48 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
@@ -70,7 +70,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               to="/admin"
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                 location.pathname.startsWith('/admin') 
-                ? 'bg-white shadow-xl text-[#175ddc]' 
+                ? 'bg-white shadow-xl text-[#0d43af]' 
                 : 'bg-black/10 text-white/70 hover:bg-black/20'
               }`}
             >
