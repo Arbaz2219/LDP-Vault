@@ -10,6 +10,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     networks:
       - ldp_internal
     restart: unless-stopped
@@ -18,11 +20,11 @@ services:
     image: ${DOCKERHUB_USERNAME}/ldp-vault-backend:latest
     container_name: ldp_vault_backend
     environment:
-      DATABASE_URL: "${DATABASE_URL}"
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public"
       JWT_SECRET: "${JWT_SECRET}"
       RESEND_API_KEY: "${RESEND_API_KEY}"
-      BACKEND_URL: "${BACKEND_URL}"
-      FRONTEND_URL: "${FRONTEND_URL}"
+      BACKEND_URL: "https://${API_DOMAIN}"
+      FRONTEND_URL: "https://${FRONTEND_DOMAIN}"
       MICROSOFT_CLIENT_ID: "${MICROSOFT_CLIENT_ID}"
       MICROSOFT_CLIENT_SECRET: "${MICROSOFT_CLIENT_SECRET}"
       MICROSOFT_TENANT_ID: "${MICROSOFT_TENANT_ID}"

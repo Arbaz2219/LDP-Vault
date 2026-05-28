@@ -144,7 +144,10 @@ router.get('/microsoft/callback', async (req, res) => {
     const token = jwt.sign({ userId: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '8h' });
 
     // Redirect back to frontend with token
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    // Dynamically determine frontend URL based on request origin if possible, or fallback to env
+    const origin = req.headers.origin || (req.headers.referer ? new URL(req.headers.referer).origin : null);
+    const frontendUrl = origin || process.env.FRONTEND_URL || 'http://localhost:5173';
+    
     res.redirect(`${frontendUrl}/login?token=${token}&user=${encodeURIComponent(JSON.stringify({
       id: user.id,
       email: user.email,
