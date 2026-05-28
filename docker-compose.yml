@@ -6,15 +6,20 @@ services:
     image: postgres:15-alpine
     container_name: ldp_vault_db
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_DB: ${POSTGRES_DB:-ldp_vault}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
       - ldp_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-ldp_vault}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
   backend:
@@ -31,7 +36,8 @@ services:
       MICROSOFT_TENANT_ID: "${MICROSOFT_TENANT_ID}"
 
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - ldp_internal
       - traefik_public
