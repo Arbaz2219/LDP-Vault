@@ -65,9 +65,9 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p 22 -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Copy Docker Compose to Server
+      - name: Copy Deployment Files to Server
         run: |
-          scp docker-compose.yml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/LDP-Vault/docker-compose.yml
+          scp docker-compose.yml fix-db-password.sh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/LDP-Vault/
 
       - name: Deploy via SSH
         run: |
