@@ -285,8 +285,8 @@ const Dashboard: React.FC = () => {
   const handleDeleteItem = async (id: string) => {
     setItemToDelete(id);
     setIsDeleting(true);
-    setDeleteConfirmInput('');
   };
+
 
   const confirmDelete = async () => {
     if (!itemToDelete) return;
