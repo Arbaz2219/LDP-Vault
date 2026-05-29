@@ -21,8 +21,10 @@ import {
   ChevronDown,
   LayoutGrid,
   Lock,
-  Trash2
+  Trash2,
+  Shield
 } from 'lucide-react';
+
 import LDPLogo from '../components/LDPLogo';
 import { encrypt, decrypt } from '../utils/crypto';
 
@@ -62,7 +64,7 @@ interface CollectionItem {
 }
 
 const Dashboard: React.FC = () => {
-  const { token, user } = useAuth();
+  const { token, user, unlock } = useAuth();
   const [items, setItems] = useState<VaultItem[]>([]);
   const [folders, setFolders] = useState<FolderItem[]>([]);
   const [collections, setCollections] = useState<CollectionItem[]>([]);
@@ -114,6 +116,16 @@ const Dashboard: React.FC = () => {
   const [masterPasswordInput, setMasterPasswordInput] = useState('');
   const [verificationError, setVerificationError] = useState('');
   const [revealField, setRevealField] = useState<'password' | 'cardNumber' | 'cvv' | 'licenseNumber'>('password');
+
+  // Delete Confirmation State
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [deleteConfirmInput, setDeleteConfirmInput] = useState('');
+  const [isDeletingLoading, setIsDeletingLoading] = useState(false);
+
+  // Scraper State
+  const [scraperLoading, setScraperLoading] = useState(false);
+  const [pendingAutomationId, setPendingAutomationId] = useState<string | null>(null);
 
   const fetchItems = async () => {
     try {
@@ -171,22 +183,37 @@ const Dashboard: React.FC = () => {
     setMasterPasswordInput('');
   };
 
-  const verifyAndReveal = async () => {
+  const verifyMasterPassword = async () => {
     try {
+      // 1. Verify against server (for security)
       const response = await api.post('/api/auth/verify-master', {
         userId: user?.id,
         password: masterPasswordInput
       });
 
       if (response.data.valid) {
-        setShowPassword(true);
+        // 2. Unlock in context (stores in sessionStorage)
+        await unlock(masterPasswordInput);
+        
         setIsVerifyingMaster(false);
-        // Log the reveal action
-        await api.post('/api/logs', {
-           action: 'REVEAL',
-           itemId: selectedItem?.id,
-           details: `${revealField} revealed for ${selectedItem?.name}`
-        }, { headers: { Authorization: `Bearer ${token}` } });
+        setMasterPasswordInput('');
+        setVerificationError('');
+
+        // 3. If it was a reveal request
+        if (revealField) {
+          setShowPassword(true);
+          await api.post('/api/logs', {
+             action: 'REVEAL',
+             itemId: selectedItem?.id,
+             details: `${revealField} revealed for ${selectedItem?.name}`
+          }, { headers: { Authorization: `Bearer ${token}` } });
+        }
+
+        // 4. If there was a pending automation, trigger it now
+        if (pendingAutomationId) {
+          triggerAutomation(pendingAutomationId, masterPasswordInput);
+          setPendingAutomationId(null);
+        }
       } else {
         setVerificationError('Invalid master password');
       }
@@ -194,6 +221,23 @@ const Dashboard: React.FC = () => {
       setVerificationError('Verification failed');
     }
   };
+
+  const triggerAutomation = async (id: string, mp: string) => {
+    setScraperLoading(true);
+    try {
+      await api.post(`/api/automation/launch/${id}`, {
+        masterPassword: mp
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setTimeout(() => setScraperLoading(false), 2000);
+    } catch (err: any) {
+      console.error('Automation failed:', err);
+      alert('Failed to start scraper: ' + (err.response?.data?.error || err.message));
+      setScraperLoading(false);
+    }
+  };
+
 
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,15 +284,31 @@ const Dashboard: React.FC = () => {
   };
 
   const handleDeleteItem = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
+    setItemToDelete(id);
+    setIsDeleting(true);
+    setDeleteConfirmInput('');
+  };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+    
+    setIsDeletingLoading(true);
     try {
-      await api.delete(`/api/vault/${id}`, {
+      console.log('Attempting to delete item:', itemToDelete);
+      const response = await api.delete(`/api/vault/${itemToDelete}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      console.log('Delete response:', response.status);
       setSelectedItem(null);
+      setIsDeleting(false);
+      setItemToDelete(null);
       await fetchItems();
-    } catch (err) {
-      alert('Failed to delete item');
+    } catch (err: any) {
+      console.error('Delete failed:', err.response?.data || err.message);
+      alert('Failed to delete item: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setIsDeletingLoading(false);
     }
   };
 
@@ -882,13 +942,42 @@ const Dashboard: React.FC = () => {
                                 <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">URI</label>
                                 <div className="flex items-center justify-between mt-1">
                                   <span className="text-blue-600 hover:underline cursor-pointer text-sm truncate max-w-xs">{selectedItem.url || 'None'}</span>
-                                  {selectedItem.url && (
-                                    <button onClick={() => window.open(selectedItem.url, '_blank')} className="p-1.5 hover:bg-gray-100 rounded text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <Globe size={16} />
-                                    </button>
-                                  )}
+                                        <button 
+                                          onClick={async () => {
+                                            let mp = sessionStorage.getItem('masterPassword') || '';
+                                            if (!mp) {
+                                              // Instead of alert, trigger the unlock verification modal
+                                              setPendingAutomationId(selectedItem.id);
+                                              setIsVerifyingMaster(true);
+                                              return;
+                                            }
+
+                                            // Show a custom "Starting Scraper" overlay
+                                            setScraperLoading(true);
+                                            try {
+                                              await api.post(`/api/automation/launch/${selectedItem.id}`, {
+                                                masterPassword: mp
+                                              }, {
+                                                headers: { Authorization: `Bearer ${token}` }
+                                              });
+                                              
+                                              setTimeout(() => setScraperLoading(false), 2000);
+                                            } catch (err: any) {
+                                              console.error('Automation failed:', err);
+                                              alert('Failed to start scraper: ' + (err.response?.data?.error || err.message));
+                                              setScraperLoading(false);
+                                            }
+                                          }}
+
+                                          className="flex items-center gap-1.5 px-3 py-1 bg-blue-600 text-white rounded text-[10px] font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20"
+                                        >
+                                          <Terminal size={12} />
+                                          Launch Scraper
+                                        </button>
+
                                 </div>
                               </div>
+
                             </>
                           )}
 
@@ -996,6 +1085,69 @@ const Dashboard: React.FC = () => {
           )}
         </div>
       </div>
+      {/* Scraper Secure Session Overlay */}
+      {scraperLoading && (
+        <div className="fixed inset-0 bg-blue-900/40 flex items-center justify-center z-[200] backdrop-blur-xl animate-fade-in">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-10 text-center border border-blue-100">
+            <div className="relative w-24 h-24 mx-auto mb-8">
+              <div className="absolute inset-0 rounded-full border-4 border-blue-50"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+              <div className="absolute inset-0 flex items-center justify-center text-blue-600">
+                <Shield size={40} />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Secure Launch</h2>
+            <p className="text-gray-500 text-sm leading-relaxed mb-6">
+              Initiating encrypted Playwright session. Your login will be performed in a fresh, isolated browser.
+            </p>
+            <div className="flex flex-col gap-2">
+              <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-full bg-blue-600 animate-progress-fast"></div>
+              </div>
+              <span className="text-[10px] uppercase tracking-widest font-bold text-blue-600">Encrypting & Routing...</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleting && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[150] backdrop-blur-md animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 border border-red-50">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+                <Trash2 size={24} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">Delete Vault Item</h2>
+                <p className="text-sm text-gray-500">This action cannot be undone.</p>
+              </div>
+            </div>
+            
+            <p className="text-sm text-gray-600 mb-8 leading-relaxed">
+              Are you sure you want to delete <span className="font-bold text-gray-800">"{items.find(i => i.id === itemToDelete)?.name}"</span>? 
+              This will permanently remove the credentials and all associated history.
+            </p>
+
+            <div className="flex gap-3">
+              <button 
+                onClick={() => { setIsDeleting(false); setItemToDelete(null); }}
+                className="flex-1 px-4 py-3 text-gray-600 font-bold border border-gray-200 rounded-xl hover:bg-gray-50 transition-all font-sans"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDelete}
+                disabled={isDeletingLoading}
+                className="flex-1 bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-200 font-sans disabled:opacity-50"
+              >
+                {isDeletingLoading ? 'Deleting...' : 'Confirm Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Master Password Verification Modal */}
       {isVerifyingMaster && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] backdrop-blur-sm">
@@ -1028,7 +1180,7 @@ const Dashboard: React.FC = () => {
                       Cancel
                     </button>
                     <button 
-                      onClick={verifyAndReveal}
+                      onClick={verifyMasterPassword}
                       className="flex-1 bg-[#175ddc] text-white font-bold py-2 rounded hover:bg-[#134db8]"
                     >
                       Unlock

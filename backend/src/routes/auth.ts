@@ -130,16 +130,18 @@ router.get('/microsoft/callback', async (req, res) => {
 
     if (!user) {
       // Auto-register the SSO user if they don't exist
-      // Note: They won't have a master password for encryption yet!
+      const defaultPasswordHash = await bcrypt.hash('123456', 10);
       user = await prisma.user.create({
         data: {
           email,
           name: name as string,
-          masterPasswordHash: '', // SSO users need to set this later for vault access
-          role: 'USER'
+          masterPasswordHash: defaultPasswordHash, 
+          role: 'USER',
+          portals: ['vault']
         }
       });
     }
+
 
     const token = jwt.sign({ userId: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '8h' });
 

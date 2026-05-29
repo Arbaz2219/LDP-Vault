@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine as build-stage
+FROM node:20 as build-stage
 
 WORKDIR /app
 
@@ -11,11 +11,13 @@ RUN npx prisma generate
 RUN npm run build
 
 # Production stage
-FROM node:20-alpine
-
-RUN apk add --no-cache openssl libc6-compat
+FROM mcr.microsoft.com/playwright:v1.44.0-jammy
 
 WORKDIR /app
+
+# Install Node.js in the playwright image (it already has it, but let's be sure)
+# The playwright image uses Ubuntu, so we use apt
+RUN apt-get update && apt-get install -y openssl libpq-dev
 
 COPY --from=build-stage /app/package*.json ./
 COPY --from=build-stage /app/node_modules ./node_modules
@@ -24,4 +26,8 @@ COPY --from=build-stage /app/prisma ./prisma
 
 EXPOSE 5000
 
-CMD ["npm", "run", "start"]
+# Install Playwright browsers (already in the image usually, but ensuring chromium is there)
+RUN npx playwright install chromium
+
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]
+

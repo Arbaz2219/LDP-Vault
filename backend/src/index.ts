@@ -11,6 +11,8 @@ import orgRoutes from './routes/org';
 import logRoutes from './routes/logs';
 import folderRoutes from './routes/folder';
 import collectionRoutes from './routes/collection';
+import automationRoutes from './routes/automation';
+
 
 const app = express();
 const prisma = new PrismaClient();
@@ -26,6 +28,8 @@ app.use('/api/org', orgRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/folder', folderRoutes);
 app.use('/api/collection', collectionRoutes);
+app.use('/api/automation', automationRoutes);
+
 
 // Basic health check
 app.get('/health', (req, res) => {

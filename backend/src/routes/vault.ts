@@ -184,11 +184,19 @@ router.put('/:id', authenticateJWT, async (req: AuthRequest, res) => {
 router.delete('/:id', authenticateJWT, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
+
+    // First delete or decouple associated audit logs to avoid foreign key constraints
+    await prisma.auditLog.deleteMany({
+      where: { itemId: id as string }
+    });
+
     await prisma.vaultItem.delete({ where: { id: id as string } });
     res.status(204).send();
   } catch (error) {
+    console.error('Failed to delete vault item:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 export default router;

@@ -28,4 +28,44 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       body: JSON.stringify({ action, itemId })
     });
   }
+
+  if (request.action === 'relayAutofill') {
+    const { targetUrl, username, password, autoSubmit } = request;
+    
+    // Find tabs that match the target URL
+    chrome.tabs.query({}, (tabs) => {
+      tabs.forEach(tab => {
+        if (tab.url && tab.url.includes(new URL(targetUrl).hostname)) {
+          console.log('LDP Vault: Found matching tab, relaying...', tab.id);
+          
+          const sendWhenReady = (tabId, msg) => {
+            chrome.tabs.get(tabId, (updatedTab) => {
+              if (updatedTab.status === 'complete') {
+                // Give it another 500ms for content scripts to initialize
+                setTimeout(() => {
+                  chrome.tabs.sendMessage(tabId, msg, (response) => {
+                    if (chrome.runtime.lastError) {
+                      console.log('Retrying message delivery...');
+                      setTimeout(() => sendWhenReady(tabId, msg), 1000);
+                    }
+                  });
+                }, 500);
+              } else {
+                setTimeout(() => sendWhenReady(tabId, msg), 500);
+              }
+            });
+          };
+
+          sendWhenReady(tab.id, {
+            action: 'autofill',
+            username,
+            password,
+            autoSubmit
+          });
+        }
+      });
+    });
+  }
 });
+
+
