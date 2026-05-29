@@ -120,7 +120,6 @@ const Dashboard: React.FC = () => {
   // Delete Confirmation State
   const [isDeleting, setIsDeleting] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
-  const [deleteConfirmInput, setDeleteConfirmInput] = useState('');
   const [isDeletingLoading, setIsDeletingLoading] = useState(false);
 
   // Scraper State
@@ -1168,7 +1167,7 @@ const Dashboard: React.FC = () => {
                       autoFocus
                       value={masterPasswordInput}
                       onChange={e => setMasterPasswordInput(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && verifyAndReveal()}
+                      onKeyDown={e => e.key === 'Enter' && verifyMasterPassword()}
                     />
                     {verificationError && <p className="text-red-500 text-xs mt-1 font-bold">{verificationError}</p>}
                  </div>
