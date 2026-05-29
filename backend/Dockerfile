@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20 as build-stage
+FROM node:20-slim as build-stage
 
 WORKDIR /app
 
@@ -15,9 +15,8 @@ FROM mcr.microsoft.com/playwright:v1.44.0-jammy
 
 WORKDIR /app
 
-# Install Node.js in the playwright image (it already has it, but let's be sure)
-# The playwright image uses Ubuntu, so we use apt
-RUN apt-get update && apt-get install -y openssl libpq-dev
+# Install only essential production dependencies
+RUN apt-get update && apt-get install -y openssl libpq-dev && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build-stage /app/package*.json ./
 COPY --from=build-stage /app/node_modules ./node_modules
@@ -26,8 +25,9 @@ COPY --from=build-stage /app/prisma ./prisma
 
 EXPOSE 5000
 
-# Install Playwright browsers (already in the image usually, but ensuring chromium is there)
-RUN npx playwright install chromium
+# Pre-install only Chromium to save space and memory
+RUN npx playwright install chromium --with-deps
 
 CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]
+
 
