@@ -1,4 +1,6 @@
+// LDP Vault Production Deployment - Memory Optimized with Swap Support
 import React, { useState, useEffect } from 'react';
+
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import { 
