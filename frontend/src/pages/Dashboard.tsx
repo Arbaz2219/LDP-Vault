@@ -1,5 +1,6 @@
-// LDP Vault Production Deployment - Memory Optimized with Swap Support
+// LDP Vault Production Deployment - Neon DB Cloud Architecture Finalized
 import React, { useState, useEffect } from 'react';
+
 
 import api from '../api';
 import { useAuth } from '../context/AuthContext';

@@ -1,30 +1,33 @@
 {
   "manifest_version": 3,
-  "name": "LDP Logistics Vault",
-  "version": "1.0",
-  "description": "Securely autofill your credentials from LDP Logistics Vault.",
+  "name": "LDP Antigravity Vault",
+  "version": "1.1.0",
+  "description": "Enterprise Secure Auto-Login for LDP Logistics.",
   "permissions": [
-    "activeTab",
+    "tabs",
     "scripting",
     "storage",
-    "tabs"
+    "webNavigation",
+    "activeTab"
   ],
   "host_permissions": [
-    "http://localhost:5000/*",
+    "https://api-vault.ldplogistics.com/*",
     "<all_urls>"
   ],
-
-  "action": {
-    "default_popup": "popup.html",
-    "default_icon": "icon.png"
-  },
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "run_at": "document_start"
     }
-  ]
+  ],
+  "action": {
+    "default_icon": "icon.png"
+  },
+  "icons": {
+    "128": "icon.png"
+  }
 }
