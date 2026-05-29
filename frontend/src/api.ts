@@ -26,16 +26,16 @@ api.interceptors.response.use(
   (error) => {
     const status = error.response?.status;
     if (status === 401 || status === 403) {
-      // Only clear session if we actually had a token stored
-      // (avoids redirect loop on the login page itself)
-      if (localStorage.getItem('token')) {
+      // Only clear and redirect if we're not already on the login page
+      // and if we actually have a session to clear.
+      if (!window.location.pathname.includes('/login') && localStorage.getItem('token')) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         sessionStorage.removeItem('masterPassword');
-        // Hard reload brings React Router back to the login route
         window.location.href = '/login';
       }
     }
+
     return Promise.reject(error);
   }
 );
