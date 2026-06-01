@@ -1032,30 +1032,6 @@ const Dashboard: React.FC = () => {
           )}
         </div>
       </div>
-      {/* Scraper Secure Session Overlay */}
-      {scraperLoading && (
-        <div className="fixed inset-0 bg-blue-900/40 flex items-center justify-center z-[200] backdrop-blur-xl animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-10 text-center border border-blue-100">
-            <div className="relative w-24 h-24 mx-auto mb-8">
-              <div className="absolute inset-0 rounded-full border-4 border-blue-50"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
-              <div className="absolute inset-0 flex items-center justify-center text-blue-600">
-                <Shield size={40} />
-              </div>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Secure Launch</h2>
-            <p className="text-gray-500 text-sm leading-relaxed mb-6">
-              Initiating encrypted Playwright session. Your login will be performed in a fresh, isolated browser.
-            </p>
-            <div className="flex flex-col gap-2">
-              <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-600 animate-progress-fast"></div>
-              </div>
-              <span className="text-[10px] uppercase tracking-widest font-bold text-blue-600">Encrypting & Routing...</span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Delete Confirmation Modal */}
       {isDeleting && (
