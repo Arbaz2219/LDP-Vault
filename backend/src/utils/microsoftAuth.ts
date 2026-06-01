@@ -1,4 +1,5 @@
 import * as msal from '@azure/msal-node';
+import { BACKEND_URL } from '../config';
 
 const msalConfig = {
     auth: {
@@ -10,4 +11,4 @@ const msalConfig = {
 
 export const msalClient = new msal.ConfidentialClientApplication(msalConfig);
 
-export const REDIRECT_URI = `${process.env.BACKEND_URL || "http://localhost:5000"}/api/auth/microsoft/callback`;
+export const REDIRECT_URI = `${BACKEND_URL}/api/auth/microsoft/callback`;

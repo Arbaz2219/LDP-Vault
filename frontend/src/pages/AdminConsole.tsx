@@ -20,7 +20,8 @@ import {
   Lock,
   ExternalLink,
   ShieldCheck,
-  XCircle
+  XCircle,
+  RefreshCw
 } from 'lucide-react';
 import LDPLogo from '../components/LDPLogo';
 import { Link, useNavigate } from 'react-router-dom';
@@ -59,6 +60,7 @@ const AdminConsole: React.FC = () => {
   
   const [resetUserId, setResetUserId] = useState<string | null>(null);
   const [resetPassword, setResetPassword] = useState('');
+  const [logs, setLogs] = useState<any[]>([]);
 
   const fetchDepartments = async () => {
     try {
@@ -93,6 +95,17 @@ const AdminConsole: React.FC = () => {
     }
   };
 
+  const fetchLogs = async () => {
+    try {
+      const response = await api.get('/api/logs', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setLogs(response.data);
+    } catch (err) {
+      console.error('Failed to fetch logs');
+    }
+  };
+
   useEffect(() => {
     if (currentUser && currentUser.role !== 'ADMIN' && !currentUser.portals?.includes('admin')) {
       navigate('/dashboard');
@@ -104,6 +117,7 @@ const AdminConsole: React.FC = () => {
       fetchDepartments();
       fetchMembers();
       fetchOrgDetails();
+      fetchLogs();
     }
   }, [token]);
 
@@ -449,6 +463,74 @@ const AdminConsole: React.FC = () => {
                              </div>
                           ))}
                        </>
+                    ) : activeTab === 'reporting' ? (
+                       <div className="space-y-6">
+                          <div className="flex items-center justify-between mb-8">
+                             <div>
+                                <h2 className="text-xl font-black text-[#1d2736] tracking-tight">Security Audit Logs</h2>
+                                <p className="text-sm text-[#5e6b7e] font-medium">Monitoring all authentication and credential access events.</p>
+                             </div>
+                             <button 
+                               onClick={fetchLogs}
+                               className="p-2 border border-[#e6ebf1] rounded-xl hover:bg-gray-50 text-[#5e6b7e]"
+                             >
+                                <RefreshCw size={18} />
+                             </button>
+                          </div>
+
+                          <div className="bg-white rounded-3xl border border-[#e6ebf1] shadow-sm overflow-hidden">
+                             <table className="w-full text-left border-collapse">
+                                <thead>
+                                   <tr className="bg-gray-50/50 border-b border-[#e6ebf1]">
+                                      <th className="px-6 py-4 text-[10px] font-black text-[#5e6b7e] uppercase tracking-widest">Timestamp</th>
+                                      <th className="px-6 py-4 text-[10px] font-black text-[#5e6b7e] uppercase tracking-widest">User</th>
+                                      <th className="px-6 py-4 text-[10px] font-black text-[#5e6b7e] uppercase tracking-widest">Action</th>
+                                      <th className="px-6 py-4 text-[10px] font-black text-[#5e6b7e] uppercase tracking-widest">Details</th>
+                                   </tr>
+                                </thead>
+                                <tbody className="divide-y divide-[#e6ebf1]">
+                                   {logs.length === 0 ? (
+                                      <tr>
+                                         <td colSpan={4} className="px-6 py-20 text-center text-[#5e6b7e]/40 font-bold italic">
+                                            No audit logs found.
+                                         </td>
+                                      </tr>
+                                   ) : (
+                                      logs.map((log: any) => (
+                                         <tr key={log.id} className="hover:bg-gray-50/50 transition-colors">
+                                            <td className="px-6 py-4 text-xs font-bold text-[#5e6b7e]">
+                                               {new Date(log.timestamp).toLocaleString()}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                               <div className="flex items-center gap-3">
+                                                  <div className="w-7 h-7 rounded-lg bg-[#d9e2f3] text-[#11347a] flex items-center justify-center font-black text-[10px]">
+                                                     {log.user?.name?.[0]?.toUpperCase() || '?'}
+                                                  </div>
+                                                  <div>
+                                                     <p className="text-xs font-bold text-[#1d2736]">{log.user?.name}</p>
+                                                     <p className="text-[10px] text-[#5e6b7e]">{log.user?.email}</p>
+                                                  </div>
+                                               </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                               <span className={`px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-wider ${
+                                                  log.action.includes('LOGIN') ? 'bg-green-50 text-green-700' : 
+                                                  log.action.includes('COPY') ? 'bg-blue-50 text-blue-700' : 
+                                                  'bg-orange-50 text-orange-700'
+                                               }`}>
+                                                  {log.action}
+                                               </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-xs font-medium text-[#1d2736]">
+                                               {log.details || 'N/A'}
+                                            </td>
+                                         </tr>
+                                      ))
+                                   )}
+                                </tbody>
+                             </table>
+                          </div>
+                       </div>
                     ) : (
                        <div className="flex flex-col items-center justify-center py-40 bg-gray-50/30 rounded-3xl border-2 border-dashed border-gray-100 mt-4">
                           <div className="p-4 bg-white rounded-2xl shadow-sm mb-4">

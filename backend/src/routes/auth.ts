@@ -5,7 +5,7 @@ import { prisma } from '../index';
 import { msalClient, REDIRECT_URI } from '../utils/microsoftAuth';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
+import { JWT_SECRET, FRONTEND_URL } from '../config';
 
 // Register
 router.post('/register', async (req, res) => {
@@ -69,6 +69,15 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign({ userId: user.id, email: user.email, role: user.role, portals: user.portals }, JWT_SECRET, { expiresIn: '8h' });
+
+    // Audit Log: Successful Login
+    await prisma.auditLog.create({
+      data: {
+        action: 'SUCCESSFUL_LOGIN',
+        userId: user.id,
+        details: `User ${user.email} logged in successfully via standard credentials.`
+      }
+    });
 
     res.json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role, portals: user.portals } });
   } catch (error) {
@@ -143,14 +152,27 @@ router.get('/microsoft/callback', async (req, res) => {
     }
 
 
-    const token = jwt.sign({ userId: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '8h' });
+    const token = jwt.sign({ 
+      userId: user.id, 
+      email: user.email, 
+      role: user.role,
+      portals: user.portals 
+    }, JWT_SECRET, { expiresIn: '8h' });
+
+    // Audit Log: SSO Successful Login
+    await prisma.auditLog.create({
+      data: {
+        action: 'SSO_LOGIN',
+        userId: user.id,
+        details: `User ${user.email} logged in successfully via Microsoft SSO.`
+      }
+    });
 
     // Redirect back to frontend with token
-    // Dynamically determine frontend URL, but ignore SSO provider origins (like Microsoft)
-    const rawOrigin = req.headers.origin || (req.headers.referer ? new URL(req.headers.referer).origin : null);
-    const origin = (rawOrigin && !rawOrigin.includes('microsoft') && !rawOrigin.includes('live.com')) ? rawOrigin : null;
+    // We strictly prefer our configured FRONTEND_URL to avoid redirecting back to Microsoft
+    const frontendUrl = FRONTEND_URL || 'http://localhost:5173';
     
-    const frontendUrl = origin || process.env.FRONTEND_URL || 'http://localhost:5173';
+    console.log(`[AUTH] SSO success for ${email}. Redirecting to ${frontendUrl}/login`);
     
     res.redirect(`${frontendUrl}/login?token=${token}&user=${encodeURIComponent(JSON.stringify({
       id: user.id,

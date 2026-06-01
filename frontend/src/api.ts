@@ -18,6 +18,18 @@ const api = axios.create({
   baseURL: API_URL
 });
 
+// Global request interceptor: automatically attach the token if it exists
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Global response interceptor: if the server returns 401 or 403,
 // the JWT is missing or has expired. Clear local storage and reload
 // so the user is redirected to login cleanly.
@@ -25,12 +37,23 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
+    const url = error.config?.url;
+    
     if (status === 401 || status === 403) {
-      // Only clear and redirect if we're not already on the login page
-      // and if we actually have a session to clear.
-      if (!window.location.pathname.includes('/login') && localStorage.getItem('token')) {
+      console.warn(`[API] Authorization failed (${status}) for request: ${url}`);
+      
+      const hasToken = !!localStorage.getItem('token');
+      const isActuallyAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+
+      // Only redirect if we ARE NOT on login/vault-lock AND we think we should be authenticated
+      const currentPath = window.location.pathname;
+      const shouldBeAtLogin = currentPath.includes('/login') || currentPath.includes('/vault-lock');
+
+      if (!shouldBeAtLogin && (hasToken || isActuallyAuthenticated)) {
+        console.error('[API] Active session rejected. Clearing state and redirecting to login...');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('isAuthenticated');
         sessionStorage.removeItem('masterPassword');
         window.location.href = '/login';
       }

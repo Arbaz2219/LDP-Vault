@@ -11,7 +11,18 @@ import Reports from './pages/Reports';
 import Layout from './components/Layout';
 
 const AppContent: React.FC = () => {
-  const { user, isLocked } = useAuth();
+  const { user, isLocked, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-6 animate-pulse">
+           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+           <p className="text-white/40 text-xs font-black tracking-[0.4em] uppercase">Restoring Secure Session</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (

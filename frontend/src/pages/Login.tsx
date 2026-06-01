@@ -24,7 +24,6 @@ const Login: React.FC = () => {
         login(token, userData);
         // Clean up URL and force navigation to dashboard
         window.history.replaceState({}, document.title, '/dashboard');
-        window.location.reload(); // Force refresh to Dashboard state
       } catch (e) {
         console.error('Failed to parse SSO data:', e);
       }

@@ -125,15 +125,10 @@ const Dashboard: React.FC = () => {
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [isDeletingLoading, setIsDeletingLoading] = useState(false);
 
-  // Scraper State
-  const [scraperLoading, setScraperLoading] = useState(false);
-  const [pendingAutomationId, setPendingAutomationId] = useState<string | null>(null);
 
   const fetchItems = async () => {
     try {
-      const response = await api.get('/api/vault', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/api/vault');
       setItems(response.data);
     } catch (err) {
       console.error('Failed to fetch items');
@@ -142,9 +137,7 @@ const Dashboard: React.FC = () => {
 
   const fetchFolders = async () => {
     try {
-      const response = await api.get('/api/folder', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/api/folder');
       setFolders(response.data);
     } catch (err) {
       console.error('Failed to fetch folders');
@@ -153,9 +146,7 @@ const Dashboard: React.FC = () => {
 
   const fetchCollections = async () => {
     try {
-      const response = await api.get('/api/collection', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/api/collection');
       setCollections(response.data);
     } catch (err) {
       console.error('Failed to fetch collections');
@@ -208,14 +199,9 @@ const Dashboard: React.FC = () => {
              action: 'REVEAL',
              itemId: selectedItem?.id,
              details: `${revealField} revealed for ${selectedItem?.name}`
-          }, { headers: { Authorization: `Bearer ${token}` } });
+          }, { /* Global headers handled by api.ts */ });
         }
 
-        // 4. If there was a pending automation, trigger it now
-        if (pendingAutomationId) {
-          triggerAutomation(pendingAutomationId, masterPasswordInput);
-          setPendingAutomationId(null);
-        }
       } else {
         setVerificationError('Invalid master password');
       }
@@ -224,21 +210,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const triggerAutomation = async (id: string, mp: string) => {
-    setScraperLoading(true);
-    try {
-      await api.post(`/api/automation/launch/${id}`, {
-        masterPassword: mp
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setTimeout(() => setScraperLoading(false), 2000);
-    } catch (err: any) {
-      console.error('Automation failed:', err);
-      alert('Failed to start scraper: ' + (err.response?.data?.error || err.message));
-      setScraperLoading(false);
-    }
-  };
 
 
   const handleAddItem = async (e: React.FormEvent) => {
@@ -273,8 +244,6 @@ const Dashboard: React.FC = () => {
         address: newAddress,
         phone: newPhone,
         licenseNumber: encryptedLicense
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
 
       setIsAdding(false);
@@ -297,9 +266,7 @@ const Dashboard: React.FC = () => {
     setIsDeletingLoading(true);
     try {
       console.log('Attempting to delete item:', itemToDelete);
-      const response = await api.delete(`/api/vault/${itemToDelete}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.delete(`/api/vault/${itemToDelete}`);
       
       console.log('Delete response:', response.status);
       setSelectedItem(null);
@@ -318,8 +285,6 @@ const Dashboard: React.FC = () => {
     try {
       await api.put(`/api/vault/${item.id}`, {
         isFavorite: !item.isFavorite
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
       if (selectedItem?.id === item.id) {
         setSelectedItem({ ...item, isFavorite: !item.isFavorite });
@@ -334,9 +299,7 @@ const Dashboard: React.FC = () => {
     e.preventDefault();
     if (!newFolderName.trim()) return;
     try {
-      await api.post('/api/folder', { name: newFolderName }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post('/api/folder', { name: newFolderName });
       setNewFolderName('');
       setShowFolderInput(false);
       await fetchFolders();
@@ -349,9 +312,7 @@ const Dashboard: React.FC = () => {
     e.stopPropagation();
     if (!confirm('Are you sure you want to delete this folder?')) return;
     try {
-      await api.delete(`/api/folder/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.delete(`/api/folder/${id}`);
       if (activeFilter === 'folder' && activeFilterId === id) {
         setActiveFilter('all');
       }
@@ -366,9 +327,7 @@ const Dashboard: React.FC = () => {
     e.preventDefault();
     if (!newCollectionName.trim()) return;
     try {
-      await api.post('/api/collection', { name: newCollectionName }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post('/api/collection', { name: newCollectionName });
       setNewCollectionName('');
       setShowCollectionInput(false);
       await fetchCollections();
@@ -381,9 +340,7 @@ const Dashboard: React.FC = () => {
     e.stopPropagation();
     if (!confirm('Are you sure you want to delete this collection?')) return;
     try {
-      await api.delete(`/api/collection/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.delete(`/api/collection/${id}`);
       if (activeFilter === 'collection' && activeFilterId === id) {
         setActiveFilter('all');
       }
@@ -910,7 +867,17 @@ const Dashboard: React.FC = () => {
                                 <div className="flex items-center justify-between mt-1">
                                   <span className="text-gray-800 font-medium">{selectedItem.username || 'None'}</span>
                                   {selectedItem.username && (
-                                    <button onClick={() => navigator.clipboard.writeText(selectedItem.username)} className="p-1.5 hover:bg-gray-100 rounded text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button 
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(selectedItem.username || '');
+                                        api.post('/api/logs', {
+                                          action: 'COPY_USERNAME',
+                                          itemId: selectedItem.id,
+                                          details: `User copied username for ${selectedItem.name}`
+                                        });
+                                      }} 
+                                      className="p-1.5 hover:bg-gray-100 rounded text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
                                       <Copy size={16} />
                                     </button>
                                   )}
@@ -931,7 +898,17 @@ const Dashboard: React.FC = () => {
                                         <button onClick={() => handleReveal('password')} className="p-1.5 hover:bg-gray-100 rounded text-blue-600">
                                           {showPassword && revealField === 'password' ? <EyeOff size={16} /> : <Eye size={16} />}
                                         </button>
-                                        <button onClick={() => navigator.clipboard.writeText(getDecryptedValue(selectedItem.password || ''))} className="p-1.5 hover:bg-gray-100 rounded text-blue-600">
+                                        <button 
+                                          onClick={() => {
+                                            navigator.clipboard.writeText(getDecryptedValue(selectedItem.password || ''));
+                                            api.post('/api/logs', {
+                                              action: 'COPY_PASSWORD',
+                                              itemId: selectedItem.id,
+                                              details: `User copied password for ${selectedItem.name}`
+                                            });
+                                          }} 
+                                          className="p-1.5 hover:bg-gray-100 rounded text-blue-600"
+                                        >
                                           <Copy size={16} />
                                         </button>
                                       </>
@@ -944,33 +921,6 @@ const Dashboard: React.FC = () => {
                                 <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">URI</label>
                                 <div className="flex items-center justify-between mt-1">
                                   <span className="text-blue-600 hover:underline cursor-pointer text-sm truncate max-w-xs">{selectedItem.url || 'None'}</span>
-                                        <button 
-                                          onClick={async () => {
-                                            let mp = sessionStorage.getItem('masterPassword') || '123456';
-
-
-                                            // Show a custom "Starting Scraper" overlay
-                                            setScraperLoading(true);
-                                            try {
-                                              await api.post(`/api/automation/launch/${selectedItem.id}`, {
-                                                masterPassword: mp
-                                              }, {
-                                                headers: { Authorization: `Bearer ${token}` }
-                                              });
-                                              
-                                              setTimeout(() => setScraperLoading(false), 2000);
-                                            } catch (err: any) {
-                                              console.error('Automation failed:', err);
-                                              alert('Failed to start scraper: ' + (err.response?.data?.error || err.message));
-                                              setScraperLoading(false);
-                                            }
-                                          }}
-
-                                          className="flex items-center gap-1.5 px-3 py-1 bg-blue-600 text-white rounded text-[10px] font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20"
-                                        >
-                                          <Terminal size={12} />
-                                          Launch Scraper
-                                        </button>
 
                                 </div>
                               </div>

@@ -12,6 +12,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isLocked: boolean;
+  loading: boolean;
   login: (token: string, user: User, password?: string) => void;
   logout: () => void;
   unlock: (password: string) => Promise<boolean>;
@@ -24,6 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLocked, setIsLocked] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
@@ -32,29 +34,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     if (savedToken && savedUser) {
       try {
+        const parsedUser = JSON.parse(savedUser);
         setToken(savedToken);
-        setUser(JSON.parse(savedUser));
+        setUser(parsedUser);
         // If we just logged in via SSO, or have a password in session, stay unlocked
         const hasMasterPassword = sessionStorage.getItem('masterPassword');
         setIsLocked(!(isActuallyAuthenticated || hasMasterPassword));
       } catch (e) {
+        console.error('Failed to restore session:', e);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('isAuthenticated');
       }
     }
+    setLoading(false);
   }, []);
 
   const login = (newToken: string, newUser: User, password?: string) => {
     setToken(newToken);
     setUser(newUser);
-    setIsLocked(false);
+    
+    // If we have a password (manual login), we can unlock. 
+    // If not (SSO), we stay locked so user must provide master password to decrypt data.
+    if (password) {
+      setIsLocked(false);
+      sessionStorage.setItem('masterPassword', password);
+    } else {
+      setIsLocked(true);
+    }
+
     // Persist session
     localStorage.setItem('isAuthenticated', 'true');
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(newUser));
-    if (password) {
-      sessionStorage.setItem('masterPassword', password);
-    }
   };
 
   const logout = () => {
@@ -113,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [token, isLocked]);
 
   return (
-    <AuthContext.Provider value={{ user, token, isLocked, login, logout, unlock, lock }}>
+    <AuthContext.Provider value={{ user, token, isLocked, loading, login, logout, unlock, lock }}>
       {children}
     </AuthContext.Provider>
   );

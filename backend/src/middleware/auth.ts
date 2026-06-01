@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
+import { JWT_SECRET } from '../config';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -19,6 +19,7 @@ export const authenticateJWT = (req: AuthRequest, res: Response, next: NextFunct
 
     jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
       if (err) {
+        console.warn(`[AUTH] Token verification failed for ${req.path}: ${err.message}`);
         return res.sendStatus(403);
       }
 
@@ -26,6 +27,7 @@ export const authenticateJWT = (req: AuthRequest, res: Response, next: NextFunct
       next();
     });
   } else {
+    console.warn(`[AUTH] No authorization header provided for ${req.path}`);
     res.sendStatus(401);
   }
 };
