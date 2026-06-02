@@ -11,7 +11,7 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLocked, setIsLocked] = useState(false);
-  const { login, logout, user } = useAuth();
+  const { login, user } = useAuth();
 
   const navigate = useNavigate();
 
@@ -54,14 +54,6 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('last_user_email');
-    setEmail('');
-    setPassword('');
-    setError('');
-    setIsLocked(false);
-    logout();
-  };
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] flex font-sans relative overflow-hidden select-none">
@@ -204,20 +196,6 @@ const Login: React.FC = () => {
               </form>
 
 
-              {/* Action toggle / logout option */}
-              {isLocked && (
-                <div className="mt-10 flex flex-col items-center">
-                  <div className="w-full border-t border-gray-100 relative mb-8">
-                    <span className="absolute left-1/2 -translate-x-1/2 -top-3 bg-white px-4 text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">Switch</span>
-                  </div>
-                  <button 
-                    onClick={handleLogout}
-                    className="w-full py-4 border border-gray-200 bg-white hover:bg-gray-50 text-[#1d2736] font-bold rounded-xl transition-all text-xs tracking-widest uppercase"
-                  >
-                    Use Different Account
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </main>

@@ -8,7 +8,7 @@ const VaultLock: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { user, unlock, logout } = useAuth();
+  const { user, unlock } = useAuth();
 
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,12 +124,6 @@ const VaultLock: React.FC = () => {
                       <rect x="11" y="11" width="9" height="9" fill="#ffbb00"/>
                     </svg>
                     Sign in with Microsoft
-                  </button>
-                  <button 
-                    onClick={logout}
-                    className="w-full py-4 border border-gray-200 bg-white hover:bg-gray-50 text-[#1d2736] font-bold rounded-xl transition-all text-xs tracking-widest uppercase"
-                  >
-                    Use Different Account
                   </button>
                 </div>
               </form>
