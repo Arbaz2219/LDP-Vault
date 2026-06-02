@@ -21,7 +21,8 @@ import {
   ExternalLink,
   ShieldCheck,
   XCircle,
-  RefreshCw
+  RefreshCw,
+  Terminal
 } from 'lucide-react';
 import LDPLogo from '../components/LDPLogo';
 import { Link, useNavigate } from 'react-router-dom';
@@ -47,7 +48,7 @@ interface Member {
 const AdminConsole: React.FC = () => {
   const { token, user: currentUser } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'collections' | 'members' | 'groups' | 'reporting' | 'integrations' | 'settings'>('collections');
+  const [activeTab, setActiveTab] = useState<'collections' | 'members' | 'reporting'>('collections');
   const [departments, setDepartments] = useState<Department[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [orgName, setOrgName] = useState('LDP VAULT');
@@ -56,7 +57,7 @@ const AdminConsole: React.FC = () => {
   const [inviteName, setInviteName] = useState('');
   const [inviteRole, setInviteRole] = useState('USER');
   const [invitePassword, setInvitePassword] = useState('');
-  const [invitePortals, setInvitePortals] = useState<string[]>(['vault']);
+  const [invitePortals, setInvitePortals] = useState<string[]>(['vault', 'terminal']);
   
   const [resetUserId, setResetUserId] = useState<string | null>(null);
   const [resetPassword, setResetPassword] = useState('');
@@ -138,7 +139,7 @@ const AdminConsole: React.FC = () => {
       setInviteEmail('');
       setInviteName('');
       setInvitePassword('');
-      setInvitePortals(['vault']);
+      setInvitePortals(['vault', 'terminal']);
       fetchMembers();
     } catch (err) {
       alert('Failed to invite user');
@@ -421,10 +422,11 @@ const AdminConsole: React.FC = () => {
                                       <Shield size={14} />
                                    </button>
                                    <button 
-                                     className="p-1.5 bg-gray-50 text-gray-200 rounded-lg cursor-not-allowed"
-                                     title="Secrets Manager (Enterprise Only)"
+                                     onClick={() => toggleUserPortal(member.id, 'terminal', member.portals || [])}
+                                     className={`p-1.5 rounded-lg transition-all ${member.portals?.includes('terminal') ? 'bg-indigo-600 text-white shadow-sm' : 'bg-gray-50 text-gray-300'}`}
+                                     title="Terminal Access"
                                    >
-                                      <Puzzle size={14} />
+                                      <Terminal size={14} />
                                    </button>
                                 </div>
                                 <div className="w-32">
@@ -612,27 +614,41 @@ const AdminConsole: React.FC = () => {
                     </div>
                  </div>
 
-                 <div className="space-y-3">
-                    <label className="text-[10px] font-black text-[#5e6b7e] uppercase tracking-[0.2em] ml-1">Initial Portal Access</label>
-                    <div className="flex gap-4">
-                       <button 
-                         type="button"
-                         onClick={() => setInvitePortals(prev => prev.includes('vault') ? prev.filter(p => p !== 'vault') : [...prev, 'vault'])}
-                         className={`flex-1 p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${invitePortals.includes('vault') ? 'border-[#11347a] bg-[#11347a]/5' : 'border-[#e6ebf1] hover:border-gray-300'}`}
-                       >
-                          <Lock size={20} className={invitePortals.includes('vault') ? 'text-[#11347a]' : 'text-gray-300'} />
-                          <span className="text-[10px] font-black uppercase tracking-widest text-[#1d2736]">Password Vault</span>
-                       </button>
-                       <button 
-                         type="button"
-                         onClick={() => setInvitePortals(prev => prev.includes('admin') ? prev.filter(p => p !== 'admin') : [...prev, 'admin'])}
-                         className={`flex-1 p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${invitePortals.includes('admin') ? 'border-[#11347a] bg-[#11347a]/5' : 'border-[#e6ebf1] hover:border-gray-300'}`}
-                       >
-                          <Shield size={20} className={invitePortals.includes('admin') ? 'text-[#11347a]' : 'text-gray-300'} />
-                          <span className="text-[10px] font-black uppercase tracking-widest text-[#1d2736]">Admin Panel</span>
-                       </button>
-                    </div>
-                 </div>
+                 <div className="space-y-4">
+                     <label className="text-[10px] font-black text-[#5e6b7e] uppercase tracking-[0.2em] ml-1">Portal Access</label>
+                     <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-[#e6ebf1]">
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const newPortals = invitePortals.includes('vault') ? invitePortals.filter(p => p !== 'vault') : [...invitePortals, 'vault'];
+                            setInvitePortals(newPortals);
+                          }}
+                          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl transition-all font-bold text-xs ${invitePortals.includes('vault') ? 'bg-[#11347a] text-white shadow-md' : 'bg-white text-gray-400 border border-gray-100'}`}
+                        >
+                           <Lock size={14} /> Vault
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const newPortals = invitePortals.includes('admin') ? invitePortals.filter(p => p !== 'admin') : [...invitePortals, 'admin'];
+                            setInvitePortals(newPortals);
+                          }}
+                          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl transition-all font-bold text-xs ${invitePortals.includes('admin') ? 'bg-[#11347a] text-white shadow-md' : 'bg-white text-gray-400 border border-gray-100'}`}
+                        >
+                           <Shield size={14} /> Admin
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const newPortals = invitePortals.includes('terminal') ? invitePortals.filter(p => p !== 'terminal') : [...invitePortals, 'terminal'];
+                            setInvitePortals(newPortals);
+                          }}
+                          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl transition-all font-bold text-xs ${invitePortals.includes('terminal') ? 'bg-[#11347a] text-white shadow-md' : 'bg-white text-gray-400 border border-gray-100'}`}
+                        >
+                           <Terminal size={14} /> Terminal
+                        </button>
+                     </div>
+                  </div>
 
                  <div className="flex gap-4 mt-12">
                     <button 

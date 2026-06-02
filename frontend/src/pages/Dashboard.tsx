@@ -7,7 +7,6 @@ import { useAuth } from '../context/AuthContext';
 import { 
   Search, 
   Plus, 
-  Info, 
   MoreVertical, 
   Copy, 
   Eye, 
@@ -22,7 +21,6 @@ import {
   Layers,
   Star,
   ChevronDown,
-  LayoutGrid,
   Lock,
   Trash2,
 } from 'lucide-react';
@@ -454,9 +452,6 @@ const Dashboard: React.FC = () => {
               </div>
             )}
           </div>
-          <button className="p-2 text-gray-400 hover:text-gray-600 border border-gray-200 rounded">
-            <LayoutGrid size={18} />
-          </button>
           <div className="w-8 h-8 rounded-full bg-[#0d43af] flex items-center justify-center text-white font-bold text-xs">
             {user?.name?.[0].toUpperCase()}
           </div>
@@ -469,7 +464,6 @@ const Dashboard: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between group">
               <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Filters</h3>
-              <Info size={14} className="text-gray-300" />
             </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -964,9 +958,24 @@ const Dashboard: React.FC = () => {
                                     <span className="text-gray-800 font-medium font-mono">
                                       {showPassword && revealField === 'cvv' ? getDecryptedValue(selectedItem.cvv || '') : '•••'}
                                     </span>
-                                    <button onClick={() => handleReveal('cvv')} className="p-1 hover:bg-gray-100 rounded text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      {showPassword && revealField === 'cvv' ? <EyeOff size={12} /> : <Eye size={12} />}
-                                    </button>
+                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <button onClick={() => handleReveal('cvv')} className="p-1.5 hover:bg-gray-100 rounded text-blue-600">
+                                        {showPassword && revealField === 'cvv' ? <EyeOff size={12} /> : <Eye size={12} />}
+                                      </button>
+                                      <button 
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(getDecryptedValue(selectedItem.cvv || ''));
+                                          api.post('/api/logs', {
+                                            action: 'COPY_CVV',
+                                            itemId: selectedItem.id,
+                                            details: `User copied CVV for ${selectedItem.name}`
+                                          });
+                                        }} 
+                                        className="p-1.5 hover:bg-gray-100 rounded text-blue-600"
+                                      >
+                                        <Copy size={12} />
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -1011,12 +1020,29 @@ const Dashboard: React.FC = () => {
                             </>
                           )}
 
-                          <div className="group border-b border-gray-100 pb-4">
-                            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Notes</label>
-                            <p className="mt-1 text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">
-                              {selectedItem.notes ? getDecryptedValue(selectedItem.notes) : 'None'}
-                            </p>
-                          </div>
+                           <div className="group border-b border-gray-100 pb-4">
+                             <div className="flex items-center justify-between">
+                                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Notes</label>
+                                {selectedItem.notes && (
+                                  <button 
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(getDecryptedValue(selectedItem.notes));
+                                      api.post('/api/logs', {
+                                        action: 'COPY_NOTES',
+                                        itemId: selectedItem.id,
+                                        details: `User copied notes for ${selectedItem.name}`
+                                      });
+                                    }} 
+                                    className="p-1 hover:bg-gray-100 rounded text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <Copy size={14} />
+                                  </button>
+                                )}
+                             </div>
+                             <p className="mt-1 text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">
+                               {selectedItem.notes ? getDecryptedValue(selectedItem.notes) : 'None'}
+                             </p>
+                           </div>
                        </div>
                        
                        <div className="flex gap-3 pt-8 border-t border-gray-100">

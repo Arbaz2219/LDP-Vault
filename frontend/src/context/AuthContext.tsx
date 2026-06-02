@@ -101,12 +101,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const resetTimer = () => {
       if (timeout) clearTimeout(timeout);
-      // 3 minutes = 180,000 milliseconds
+      // 5 minutes = 300,000 milliseconds
       timeout = setTimeout(() => {
         if (token && !isLocked) {
           lock();
         }
-      }, 180000);
+      }, 300000);
     };
 
     if (token && !isLocked) {
