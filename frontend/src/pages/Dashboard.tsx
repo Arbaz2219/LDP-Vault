@@ -25,7 +25,6 @@ import {
   LayoutGrid,
   Lock,
   Trash2,
-  Shield
 } from 'lucide-react';
 
 import LDPLogo from '../components/LDPLogo';
