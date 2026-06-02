@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api, { API_URL } from '../api';
 import { Eye, EyeOff } from 'lucide-react';
@@ -12,6 +13,8 @@ const Login: React.FC = () => {
   const [isLocked, setIsLocked] = useState(false);
   const { login, logout, user } = useAuth();
 
+  const navigate = useNavigate();
+
   // Handle SSO Redirect
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -22,13 +25,13 @@ const Login: React.FC = () => {
       try {
         const userData = JSON.parse(decodeURIComponent(userParam));
         login(token, userData);
-        // Clean up URL and force navigation to dashboard
-        window.history.replaceState({}, document.title, '/dashboard');
+        // Clear params and force navigation within Router context
+        navigate(window.location.pathname, { replace: true });
       } catch (e) {
         console.error('Failed to parse SSO data:', e);
       }
     }
-  }, [login]);
+  }, [login, navigate]);
 
   // If a user is already in state but we show login, we can offer the "Unlock" screen
   useEffect(() => {

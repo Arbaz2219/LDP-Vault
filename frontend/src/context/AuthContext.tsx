@@ -30,16 +30,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
-    const isActuallyAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-    
     if (savedToken && savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser);
         setToken(savedToken);
         setUser(parsedUser);
-        // If we just logged in via SSO, or have a password in session, stay unlocked
+        
+        // On refresh, we should be locked unless we have the master password in session
         const hasMasterPassword = sessionStorage.getItem('masterPassword');
-        setIsLocked(!(isActuallyAuthenticated || hasMasterPassword));
+        setIsLocked(!hasMasterPassword);
       } catch (e) {
         console.error('Failed to restore session:', e);
         localStorage.removeItem('token');
@@ -75,7 +74,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLocked(true);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    localStorage.removeItem('masterPassword'); // Never store this long-term
+    localStorage.removeItem('isAuthenticated');
+    sessionStorage.removeItem('masterPassword');
   };
 
   const unlock = async (password: string): Promise<boolean> => {
