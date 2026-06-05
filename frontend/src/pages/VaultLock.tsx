@@ -37,7 +37,10 @@ const VaultLock: React.FC = () => {
       </div>
 
       {/* Right Content Area */}
-      <div className="flex-1 flex flex-col justify-between h-screen overflow-y-auto bg-white lg:bg-[#f8f9fc] py-8">
+      <div className="flex-1 flex flex-col justify-between h-screen overflow-y-auto bg-white lg:bg-[#f8f9fc]">
+        
+        {/* Safe Area / Top Branding Bar */}
+        <div className="h-2 w-full bg-gradient-to-r from-transparent via-[#0d43af]/5 to-transparent hidden lg:block"></div>
         
         {/* Mobile Header */}
         <header className="px-6 py-2 z-10 lg:hidden text-[#175ddc]">
