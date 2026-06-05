@@ -98,6 +98,7 @@ router.post('/verify-master', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
+});
 
 // Set Master Password (first time for SSO users)
 router.post('/set-master', async (req, res) => {
