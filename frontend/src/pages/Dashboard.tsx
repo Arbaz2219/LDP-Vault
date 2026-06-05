@@ -404,7 +404,29 @@ const Dashboard: React.FC = () => {
     return true;
   });
 
-  const getIcon = (type: string) => {
+  const getIcon = (type: string, url?: string) => {
+    let domain = '';
+    if (url) {
+      try {
+        domain = new URL(url.startsWith('http') ? url : `https://${url}`).hostname;
+      } catch (e) {
+        domain = url;
+      }
+    }
+
+    if (domain && domain !== 'None') {
+      return (
+        <img 
+          src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`} 
+          className="w-4 h-4 rounded-sm" 
+          alt=""
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = 'https://www.google.com/s2/favicons?domain=google.com&sz=64'; // very generic fallback
+          }}
+        />
+      );
+    }
+
     switch (type) {
       case 'card': return <CreditCard size={18} />;
       case 'identity': return <User size={18} />;
@@ -918,9 +940,9 @@ const Dashboard: React.FC = () => {
                   ) : selectedItem && (
                     <div className="space-y-8">
                        <div className="flex items-start gap-4">
-                          <div className="w-16 h-16 rounded border border-gray-200 flex items-center justify-center bg-gray-50 text-gray-400">
-                            {getIcon(selectedItem.type)}
-                          </div>
+                          <div className="w-10 h-10 rounded-lg border border-gray-100 flex items-center justify-center bg-gray-50 text-gray-400 group-hover:bg-white transition-colors overflow-hidden">
+                          {getIcon(selectedItem.type, selectedItem.url)}
+                        </div>
                           <div>
                             <h2 className="text-2xl font-bold text-gray-800 leading-tight">{selectedItem.name}</h2>
                             <p className="text-sm text-gray-500 uppercase mt-1">{selectedItem.type}</p>
@@ -986,11 +1008,17 @@ const Dashboard: React.FC = () => {
                                 </div>
                               </div>
 
-                              <div className="group border-b border-gray-100 pb-4">
+                               <div className="group border-b border-gray-100 pb-4">
                                 <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">URI</label>
                                 <div className="flex items-center justify-between mt-1">
-                                  <span className="text-blue-600 hover:underline cursor-pointer text-sm truncate max-w-xs">{selectedItem.url || 'None'}</span>
-
+                                  <a 
+                                    href={selectedItem.url?.startsWith('http') ? selectedItem.url : `https://${selectedItem.url}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline text-sm truncate max-w-xs font-bold"
+                                  >
+                                    {selectedItem.url || 'None'}
+                                  </a>
                                 </div>
                               </div>
 

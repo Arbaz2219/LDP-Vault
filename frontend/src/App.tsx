@@ -16,10 +16,16 @@ const AppContent: React.FC = () => {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-6 animate-pulse">
-           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-           <p className="text-white/40 text-xs font-black tracking-[0.4em] uppercase">Restoring Secure Session</p>
+      <div className="min-h-screen mesh-gradient flex items-center justify-center p-8">
+        <div className="flex flex-col items-center gap-8 animate-fade-in">
+           <div className="relative">
+             <div className="w-24 h-24 border-4 border-white/20 rounded-full"></div>
+             <div className="absolute top-0 left-0 w-24 h-24 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+           </div>
+           <div className="text-center">
+             <p className="text-white text-lg font-black tracking-[0.5em] uppercase mb-2">LDP Vault</p>
+             <p className="text-white/40 text-[10px] font-bold tracking-[0.3em] uppercase">Initializing Secure Session</p>
+           </div>
         </div>
       </div>
     );
