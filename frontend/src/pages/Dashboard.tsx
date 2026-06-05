@@ -692,6 +692,20 @@ const Dashboard: React.FC = () => {
                     <p className="font-bold text-gray-800 text-sm">{item.name}</p>
                     <p className="text-xs text-gray-500 truncate">{item.username || item.url || 'No Details'}</p>
                   </div>
+                  <div className="w-10 flex justify-end gap-2 pr-4">
+                    {item.url && (
+                      <a 
+                        href={item.url.startsWith('http') ? item.url : `https://${item.url}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="p-1.5 rounded hover:bg-white hover:shadow-sm text-blue-600 transition-all border border-transparent hover:border-blue-100"
+                        title={`Launch ${item.name}`}
+                        onClick={e => e.stopPropagation()}
+                      >
+                        <Globe size={14} />
+                      </a>
+                    )}
+                  </div>
                   <div className="w-48 text-right text-xs text-gray-400">
                     My vault
                   </div>
