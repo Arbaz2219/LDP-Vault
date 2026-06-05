@@ -685,8 +685,8 @@ const Dashboard: React.FC = () => {
                   onClick={() => { setSelectedItem(item); setIsAdding(false); setShowPassword(false); }}
                 >
                   <input type="checkbox" className="rounded" />
-                  <div className="w-10 h-10 rounded border border-gray-200 flex items-center justify-center text-gray-400 bg-white">
-                    {getIcon(item.type)}
+                  <div className="w-10 h-10 rounded border border-gray-200 flex items-center justify-center text-gray-400 bg-white overflow-hidden">
+                    {getIcon(item.type, item.url)}
                   </div>
                   <div className="flex-1">
                     <p className="font-bold text-gray-800 text-sm">{item.name}</p>
@@ -761,10 +761,17 @@ const Dashboard: React.FC = () => {
                                 </button>
                               </div>
                             </div>
-                            <div>
-                              <label className="text-[11px] font-bold text-gray-500 uppercase">URL</label>
-                              <input type="text" className="input-field mt-1" value={newUrl} onChange={e => setNewUrl(e.target.value)} />
-                            </div>
+                            <div className="relative">
+                          <label className="text-[11px] font-bold text-gray-500 uppercase">URI / Website</label>
+                          <div className="flex gap-2 items-center mt-1">
+                            <input type="text" className="input-field" value={newUrl} onChange={e => setNewUrl(e.target.value)} placeholder="e.g. google.com" />
+                            {newUrl && (
+                               <div className="w-10 h-10 border border-gray-200 rounded flex items-center justify-center bg-gray-50 shrink-0 overflow-hidden" title="Icon Preview">
+                                 {getIcon('login', newUrl)}
+                               </div>
+                            )}
+                          </div>
+                        </div>
                           </>
                         )}
 
