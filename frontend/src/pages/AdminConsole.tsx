@@ -473,7 +473,7 @@ const AdminConsole: React.FC = () => {
                                       </button>
                                       <div className="h-px bg-gray-100 my-1 mx-2"></div>
                                       <button 
-                                        onClick={() => handleDeleteUser(member.id)}
+                                        onClick={(e) => { e.stopPropagation(); handleDeleteUser(member.id); }}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl"
                                       >
                                          <XCircle size={14} /> Remove Member
