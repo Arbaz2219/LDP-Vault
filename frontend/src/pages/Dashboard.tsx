@@ -25,6 +25,7 @@ import {
   Lock,
   Trash2,
   Shield,
+  LogOut,
 } from 'lucide-react';
 
 import LDPLogo from '../components/LDPLogo';
@@ -67,7 +68,7 @@ interface CollectionItem {
 }
 
 const Dashboard: React.FC = () => {
-  const { token, user, unlock } = useAuth();
+  const { token, user, unlock, lock, logout } = useAuth();
   const [items, setItems] = useState<VaultItem[]>([]);
   const [folders, setFolders] = useState<FolderItem[]>([]);
   const [collections, setCollections] = useState<CollectionItem[]>([]);
@@ -77,6 +78,7 @@ const Dashboard: React.FC = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showNewMenu, setShowNewMenu] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   // Filters State
   const [activeFilter, setActiveFilter] = useState<'all' | 'favorites' | 'login' | 'card' | 'identity' | 'note' | 'ssh' | 'folder' | 'collection'>('all');
@@ -408,9 +410,14 @@ const Dashboard: React.FC = () => {
     let domain = '';
     if (url) {
       try {
-        domain = new URL(url.startsWith('http') ? url : `https://${url}`).hostname;
+        // Handle emails slightly differently to extract the domain
+        if (url.includes('@') && !url.includes('/')) {
+           domain = url.split('@')[1].toLowerCase();
+        } else {
+           domain = new URL(url.startsWith('http') ? url : `https://${url}`).hostname;
+        }
       } catch (e) {
-        domain = url;
+        domain = url.toLowerCase();
       }
     }
 
@@ -498,8 +505,47 @@ const Dashboard: React.FC = () => {
               </div>
             )}
           </div>
-          <div className="w-8 h-8 rounded-full bg-[#0d43af] flex items-center justify-center text-white font-bold text-xs">
-            {user?.name?.[0].toUpperCase()}
+
+          {/* Profile Dropdown */}
+          <div className="relative">
+            <div 
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 shadow-lg flex items-center justify-center text-white font-black text-sm shrink-0 border border-white/20 cursor-pointer hover:scale-105 transition-transform"
+              title="Profile & Settings"
+            >
+              {user?.name?.[0].toUpperCase()}
+            </div>
+
+            {showProfileMenu && (
+              <div className="absolute top-full right-0 mt-3 w-64 bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                <div className="p-5 border-b border-gray-50 bg-gray-50/50">
+                  <div className="flex items-center gap-3 mb-1">
+                    <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-black text-xs">
+                      {user?.name?.[0].toUpperCase()}
+                    </div>
+                    <p className="text-xs font-black text-slate-800 truncate uppercase tracking-tighter">{user?.name}</p>
+                  </div>
+                  <p className="text-[10px] text-slate-400 font-bold truncate pl-11">{user?.email}</p>
+                </div>
+                <div className="p-2">
+                  <button 
+                    onClick={() => { lock(); setShowProfileMenu(false); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-colors"
+                  >
+                    <Lock size={16} className="text-slate-400" />
+                    Lock Vault
+                  </button>
+                  <div className="h-px bg-gray-50 mx-2 my-1"></div>
+                  <button 
+                    onClick={() => { logout(); setShowProfileMenu(false); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                  >
+                    <LogOut size={16} className="text-red-400" />
+                    Log Out
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
