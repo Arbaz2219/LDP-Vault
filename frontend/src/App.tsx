@@ -12,9 +12,10 @@ import Reports from './pages/Reports';
 import Layout from './components/Layout';
 
 const AppContent: React.FC = () => {
-  const { user, isLocked, loading } = useAuth();
+  const { user, loading, isLocked } = useAuth();
+  const hasToken = !!localStorage.getItem('token');
   
-  if (loading) {
+  if (loading && hasToken) {
     return (
       <div className="min-h-screen mesh-gradient flex items-center justify-center p-8">
         <div className="flex flex-col items-center gap-8 animate-fade-in">

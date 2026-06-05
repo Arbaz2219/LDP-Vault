@@ -69,8 +69,8 @@ const Login: React.FC = () => {
         <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-white/10 rounded-full blur-[80px]"></div>
         
         {/* White Logo in the Sidebar */}
-        <div className="z-10 animate-fade-in flex flex-col items-center drop-shadow-2xl">
-          <LDPLogo className="h-80 w-auto" variant="white" />
+        <div className="z-10 animate-fade-in flex flex-col items-center drop-shadow-2xl scale-95 opacity-90">
+          <LDPLogo className="h-64 w-auto" variant="white" />
         </div>
         
         {/* Branding Subtitle */}
