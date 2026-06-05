@@ -177,6 +177,23 @@ const AdminConsole: React.FC = () => {
     }
   };
 
+  const handleDeleteUser = async (userId: string) => {
+    if (userId === currentUser?.id) {
+      alert('You cannot delete your own admin account');
+      return;
+    }
+    if (!confirm('Are you sure you want to PERMANENTLY remove this member? All their personal data will be deleted.')) return;
+    
+    try {
+      await api.delete(`/api/org/users/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchMembers();
+    } catch (err) {
+      alert('Failed to remove member');
+    }
+  };
+
   const navItems = [
     { id: 'collections', label: 'Collections', icon: <Layers size={18} /> },
     { id: 'members', label: 'Members', icon: <Users size={18} /> },
@@ -456,6 +473,7 @@ const AdminConsole: React.FC = () => {
                                       </button>
                                       <div className="h-px bg-gray-100 my-1 mx-2"></div>
                                       <button 
+                                        onClick={() => handleDeleteUser(member.id)}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl"
                                       >
                                          <XCircle size={14} /> Remove Member

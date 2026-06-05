@@ -98,7 +98,28 @@ router.post('/verify-master', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
+
+// Set Master Password (first time for SSO users)
+router.post('/set-master', async (req, res) => {
+  try {
+    const { userId, password } = req.body;
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.masterPasswordHash) return res.status(400).json({ error: 'Master password already set' });
+
+    const hash = await bcrypt.hash(password, 10);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { masterPasswordHash: hash }
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
+
 
 
 // Microsoft SSO Login
@@ -139,12 +160,12 @@ router.get('/microsoft/callback', async (req, res) => {
 
     if (!user) {
       // Auto-register the SSO user if they don't exist
-      const defaultPasswordHash = await bcrypt.hash('123456', 10);
+      // We set masterPasswordHash to null so they MUST set it on first login
       user = await prisma.user.create({
         data: {
           email,
           name: name as string,
-          masterPasswordHash: defaultPasswordHash, 
+          masterPasswordHash: null, 
           role: 'USER',
           portals: ['vault']
         }
@@ -156,7 +177,8 @@ router.get('/microsoft/callback', async (req, res) => {
       userId: user.id, 
       email: user.email, 
       role: user.role,
-      portals: user.portals 
+      portals: user.portals,
+      isMasterPasswordSet: !!user.masterPasswordHash
     }, JWT_SECRET, { expiresIn: '8h' });
 
     // Audit Log: SSO Successful Login

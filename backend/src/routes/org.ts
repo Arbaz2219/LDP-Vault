@@ -209,4 +209,38 @@ router.patch('/', authenticateJWT, isAdmin, async (req: AuthRequest, res) => {
   }
 });
 
+// Delete User (Admin only)
+router.delete('/users/:userId', authenticateJWT, isAdmin, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.params.userId as string;
+    const adminUser = await prisma.user.findUnique({ where: { id: req.user?.userId } });
+    
+    // Prevent self-deletion
+    if (userId === req.user?.userId) {
+       return res.status(400).json({ error: 'You cannot delete your own admin account' });
+    }
+
+    const targetUser = await prisma.user.findUnique({ where: { id: userId } });
+    if (!targetUser || targetUser.organizationId !== adminUser?.organizationId) {
+      return res.status(404).json({ error: 'User not found in your organization' });
+    }
+
+    // Cleanup associated data
+    await prisma.auditLog.deleteMany({ where: { userId } });
+    await prisma.departmentUser.deleteMany({ where: { userId } });
+    
+    // Decouple items instead of deleting? No, Bitwarden style usually deletes personal items.
+    await prisma.vaultItem.deleteMany({ where: { userId } });
+    await prisma.folder.deleteMany({ where: { userId } });
+    await prisma.collection.deleteMany({ where: { userId } });
+
+    await prisma.user.delete({ where: { id: userId } });
+
+    res.status(204).send();
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

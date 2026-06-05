@@ -6,6 +6,7 @@ interface User {
   name: string;
   role: string;
   portals: string[];
+  isMasterPasswordSet?: boolean;
 }
 
 interface AuthContextType {
@@ -17,6 +18,7 @@ interface AuthContextType {
   logout: () => void;
   unlock: (password: string) => Promise<boolean>;
   lock: () => void;
+  setIsMasterPasswordSet: (value: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -95,6 +97,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sessionStorage.removeItem('masterPassword');
   };
 
+  const setIsMasterPasswordSet = (value: boolean) => {
+    if (user) {
+      const updatedUser = { ...user, isMasterPasswordSet: value };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
+  };
+
   // Auto-lock after 3 minutes of inactivity
   useEffect(() => {
     let timeout: any;
@@ -125,7 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [token, isLocked]);
 
   return (
-    <AuthContext.Provider value={{ user, token, isLocked, loading, login, logout, unlock, lock }}>
+    <AuthContext.Provider value={{ user, token, isLocked, loading, login, logout, unlock, lock, setIsMasterPasswordSet }}>
       {children}
     </AuthContext.Provider>
   );
