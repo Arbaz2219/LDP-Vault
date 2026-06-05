@@ -538,9 +538,9 @@ const Dashboard: React.FC = () => {
                   <div className="h-px bg-gray-50 mx-2 my-1"></div>
                   <button 
                     onClick={() => { logout(); setShowProfileMenu(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-[#0d43af] hover:bg-blue-50 rounded-xl transition-colors"
                   >
-                    <LogOut size={16} className="text-red-400" />
+                    <LogOut size={16} className="text-[#0d43af]" />
                     Log Out
                   </button>
                 </div>
