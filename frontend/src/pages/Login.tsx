@@ -21,14 +21,18 @@ const Login: React.FC = () => {
     const token = params.get('token');
     const userParam = params.get('user');
 
+    console.log('[DEBUG] SSO callback params:', { hasToken: !!token, hasUser: !!userParam });
+
     if (token && userParam) {
       try {
         const userData = JSON.parse(decodeURIComponent(userParam));
+        console.log('[DEBUG] Logging in with SSO user:', userData.email);
         login(token, userData);
         // Clear params and force navigation within Router context
-        navigate(window.location.pathname, { replace: true });
+        navigate('/', { replace: true });
       } catch (e) {
         console.error('Failed to parse SSO data:', e);
+        setError('SSO Authentication failed at parsing');
       }
     }
   }, [login, navigate]);
@@ -170,29 +174,27 @@ const Login: React.FC = () => {
                 </button>
 
                 {/* SSO Section */}
-                {!isLocked && (
-                  <div className="pt-2">
-                    <div className="w-full border-t border-gray-100 relative mb-8">
-                      <span className="absolute left-1/2 -translate-x-1/2 -top-3 bg-white px-4 text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">OR</span>
-                    </div>
-                    <button 
-                      type="button"
-                      onClick={() => window.location.href = `${API_URL}/api/auth/microsoft`}
-                      className="w-full py-3.5 px-4 flex items-center justify-center gap-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold rounded-xl transition-all text-sm shadow-sm active:scale-[0.98]"
-                    >
-                      <svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
-                        <rect x="11" y="1" width="9" height="9" fill="#7fbb00"/>
-                        <rect x="1" y="11" width="9" height="9" fill="#00a1f1"/>
-                        <rect x="11" y="11" width="9" height="9" fill="#ffbb00"/>
-                      </svg>
-                      Sign in with Microsoft
-                    </button>
-                    <p className="mt-4 text-[10px] text-center text-gray-400 font-medium leading-relaxed">
-                      Enterprise users can sign in using their corporate Azure AD / Microsoft 365 account.
-                    </p>
+                <div className="pt-2">
+                  <div className="w-full border-t border-gray-100 relative mb-8">
+                    <span className="absolute left-1/2 -translate-x-1/2 -top-3 bg-white px-4 text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">OR</span>
                   </div>
-                )}
+                  <button 
+                    type="button"
+                    onClick={() => window.location.href = `${API_URL}/api/auth/microsoft`}
+                    className="w-full py-3.5 px-4 flex items-center justify-center gap-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold rounded-xl transition-all text-sm shadow-sm active:scale-[0.98]"
+                  >
+                    <svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+                      <rect x="11" y="1" width="9" height="9" fill="#7fbb00"/>
+                      <rect x="1" y="11" width="9" height="9" fill="#00a1f1"/>
+                      <rect x="11" y="11" width="9" height="9" fill="#ffbb00"/>
+                    </svg>
+                    Sign in with Microsoft
+                  </button>
+                  <p className="mt-4 text-[10px] text-center text-gray-400 font-medium leading-relaxed">
+                    Enterprise users can sign in using their corporate Azure AD / Microsoft 365 account.
+                  </p>
+                </div>
               </form>
 
 

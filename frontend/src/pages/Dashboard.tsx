@@ -1,5 +1,6 @@
 // LDP Vault Production Deployment - Neon DB Cloud Architecture Finalized
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 
 import api from '../api';
@@ -23,6 +24,7 @@ import {
   ChevronDown,
   Lock,
   Trash2,
+  Shield,
 } from 'lucide-react';
 
 import LDPLogo from '../components/LDPLogo';
@@ -50,6 +52,7 @@ interface VaultItem {
   address?: string;
   phone?: string;
   licenseNumber?: string;
+  customFields?: {name: string, value: string}[];
   updatedAt: string;
 }
 
@@ -110,6 +113,7 @@ const Dashboard: React.FC = () => {
   const [newAddress, setNewAddress] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [newLicenseNumber, setNewLicenseNumber] = useState('');
+  const [newCustomFields, setNewCustomFields] = useState<{name: string, value: string}[]>([]);
 
   // Verification modal state
   const [isVerifyingMaster, setIsVerifyingMaster] = useState(false);
@@ -240,7 +244,8 @@ const Dashboard: React.FC = () => {
         lastName: newLastName,
         address: newAddress,
         phone: newPhone,
-        licenseNumber: encryptedLicense
+        licenseNumber: encryptedLicense,
+        customFields: newCustomFields.map(f => ({ name: f.name, value: f.value ? encrypt(f.value, masterPassword) : '' }))
       });
 
       setIsAdding(false);
@@ -368,6 +373,8 @@ const Dashboard: React.FC = () => {
     setNewAddress('');
     setNewPhone('');
     setNewLicenseNumber('');
+    setNewCustomFields([]);
+    loadAllData();
   };
 
   const getDecryptedValue = (ciphertext: string) => {
@@ -406,6 +413,23 @@ const Dashboard: React.FC = () => {
       default: return <Globe size={18} />;
     }
   };
+
+  if (!user?.portals?.includes('vault')) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 p-12 text-center">
+        <div className="w-20 h-20 bg-amber-50 text-amber-500 rounded-3xl flex items-center justify-center mb-6 shadow-sm border border-amber-100">
+          <Shield size={40} />
+        </div>
+        <h2 className="text-2xl font-black text-gray-800 mb-2">Vault Access Required</h2>
+        <p className="text-gray-500 max-w-sm mb-8 font-medium">Your account does not have permission to access the Secure Vault portal. Please use the Admin Console or contact support.</p>
+        {(user?.role === 'ADMIN' || user?.portals?.includes('admin')) && (
+          <Link to="/admin" className="px-8 py-3 bg-[#0d43af] text-white font-bold rounded-xl hover:bg-[#0a358a] transition-all text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20">
+            Go to Admin Console
+          </Link>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-white">
@@ -808,6 +832,58 @@ const Dashboard: React.FC = () => {
                             {collections.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                           </select>
                         </div>
+                        {/* Custom Fields Section */}
+                        <div className="space-y-4 pt-4 border-t border-gray-100">
+                          <div className="flex items-center justify-between">
+                            <label className="text-[11px] font-black text-gray-500 uppercase tracking-widest">Custom Fields</label>
+                            <button 
+                              type="button" 
+                              onClick={() => setNewCustomFields([...newCustomFields, { name: '', value: '' }])}
+                              className="text-[10px] font-bold text-[#175ddc] hover:underline uppercase flex items-center gap-1"
+                            >
+                              <Plus size={10} /> Add Field
+                            </button>
+                          </div>
+                          {newCustomFields.map((field, index) => (
+                            <div key={index} className="flex gap-2 items-end group">
+                              <div className="flex-1">
+                                <label className="text-[9px] font-bold text-gray-400 uppercase">Field Name</label>
+                                <input 
+                                  type="text" 
+                                  placeholder="e.g. Pin Code" 
+                                  className="input-field mt-0.5 h-9 text-xs" 
+                                  value={field.name} 
+                                  onChange={e => {
+                                    const updated = [...newCustomFields];
+                                    updated[index].name = e.target.value;
+                                    setNewCustomFields(updated);
+                                  }}
+                                />
+                              </div>
+                              <div className="flex-[2]">
+                                <label className="text-[9px] font-bold text-gray-400 uppercase">Value</label>
+                                <input 
+                                  type="text" 
+                                  placeholder="Value..." 
+                                  className="input-field mt-0.5 h-9 text-xs" 
+                                  value={field.value} 
+                                  onChange={e => {
+                                    const updated = [...newCustomFields];
+                                    updated[index].value = e.target.value;
+                                    setNewCustomFields(updated);
+                                  }}
+                                />
+                              </div>
+                              <button 
+                                type="button" 
+                                onClick={() => setNewCustomFields(newCustomFields.filter((_, i) => i !== index))}
+                                className="p-2 mb-0.5 text-gray-300 hover:text-red-500 transition-colors"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
 
                         <div className="flex items-center gap-3 py-2">
                            <input 
@@ -917,6 +993,28 @@ const Dashboard: React.FC = () => {
 
                                 </div>
                               </div>
+
+                              {/* Custom Fields in Details */}
+                              {selectedItem.customFields && (selectedItem.customFields as any[]).length > 0 && (
+                                <div className="pt-2 space-y-4">
+                                  {(selectedItem.customFields as any[]).map((field: any, idx: number) => (
+                                    <div key={idx} className="group border-b border-gray-100 pb-4">
+                                      <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">{field.name}</label>
+                                      <div className="flex items-center justify-between mt-1">
+                                        <span className="text-gray-800 font-medium">
+                                          {getDecryptedValue(field.value)}
+                                        </span>
+                                        <button 
+                                          onClick={() => navigator.clipboard.writeText(getDecryptedValue(field.value))}
+                                          className="p-1.5 hover:bg-gray-100 rounded text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                          <Copy size={16} />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
 
                             </>
                           )}

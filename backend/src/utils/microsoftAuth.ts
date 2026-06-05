@@ -11,4 +11,6 @@ const msalConfig = {
 
 export const msalClient = new msal.ConfidentialClientApplication(msalConfig);
 
-export const REDIRECT_URI = `${BACKEND_URL}/api/auth/microsoft/callback`;
+export const REDIRECT_URI = process.env.API_DOMAIN 
+    ? `https://${process.env.API_DOMAIN}/api/auth/microsoft/callback`
+    : `${BACKEND_URL}/api/auth/microsoft/callback`;

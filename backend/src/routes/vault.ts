@@ -47,7 +47,7 @@ router.post('/', authenticateJWT, async (req: AuthRequest, res) => {
       name, username, password, url, notes, departmentId, isHidden,
       type, isFavorite, folderId, collectionId,
       cardholderName, cardNumber, expirationMonth, expirationYear, cvv,
-      firstName, lastName, address, phone, licenseNumber
+      firstName, lastName, address, phone, licenseNumber, customFields
     } = req.body;
 
     if (!name) return res.status(400).json({ error: 'Name is required' });
@@ -84,6 +84,7 @@ router.post('/', authenticateJWT, async (req: AuthRequest, res) => {
         address,
         phone,
         licenseNumber,
+        customFields: customFields || undefined,
         userId: departmentId ? undefined : userId,
         departmentId: departmentId || undefined
       }
@@ -134,7 +135,7 @@ router.put('/:id', authenticateJWT, async (req: AuthRequest, res) => {
       name, username, password, url, notes, isHidden,
       type, isFavorite, folderId, collectionId,
       cardholderName, cardNumber, expirationMonth, expirationYear, cvv,
-      firstName, lastName, address, phone, licenseNumber
+      firstName, lastName, address, phone, licenseNumber, customFields
     } = req.body;
 
     let domain = null;
@@ -169,7 +170,8 @@ router.put('/:id', authenticateJWT, async (req: AuthRequest, res) => {
         lastName,
         address,
         phone,
-        licenseNumber
+        licenseNumber,
+        customFields: customFields !== undefined ? customFields : undefined
       }
     });
 

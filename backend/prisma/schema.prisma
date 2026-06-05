@@ -102,6 +102,7 @@ model VaultItem {
   address         String?
   phone           String?
   licenseNumber   String?
+  customFields    Json?
   userId          String?
   departmentId    String?
   folderId        String?

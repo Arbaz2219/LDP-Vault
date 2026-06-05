@@ -169,8 +169,11 @@ router.get('/microsoft/callback', async (req, res) => {
     });
 
     // Redirect back to frontend with token
-    // We strictly prefer our configured FRONTEND_URL to avoid redirecting back to Microsoft
-    const frontendUrl = FRONTEND_URL || 'http://localhost:5173';
+    // Detect if we should use the domain or keep localhost for dev
+    const useDomain = process.env.FRONTEND_DOMAIN && !req.get('host')?.includes('localhost');
+    const frontendUrl = useDomain 
+      ? `https://${process.env.FRONTEND_DOMAIN}` 
+      : (FRONTEND_URL || 'http://localhost:5173');
     
     console.log(`[AUTH] SSO success for ${email}. Redirecting to ${frontendUrl}/login`);
     
