@@ -198,15 +198,18 @@ router.get('/microsoft/callback', async (req, res) => {
       ? `https://${process.env.FRONTEND_DOMAIN}` 
       : (FRONTEND_URL || 'http://localhost:5173');
     
-    console.log(`[AUTH] SSO success for ${email}. Redirecting to ${frontendUrl}/login`);
-    
-    res.redirect(`${frontendUrl}/login?token=${token}&user=${encodeURIComponent(JSON.stringify({
+    const finalRedirectUrl = `${frontendUrl}/login?token=${token}&user=${encodeURIComponent(JSON.stringify({
       id: user.id,
       email: user.email,
       name: user.name,
       role: user.role,
       portals: user.portals
-    }))}`);
+    }))}`;
+
+    console.log(`[AUTH] SSO success for ${email}. Redirecting to ${frontendUrl}/login`);
+    console.log(`[AUTH] Full Redirect URL: ${finalRedirectUrl}`);
+    
+    res.redirect(finalRedirectUrl);
 
   } catch (error: any) {
     console.error('Microsoft callback full error:', JSON.stringify(error, null, 2));

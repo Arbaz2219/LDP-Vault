@@ -52,6 +52,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = (newToken: string, newUser: User, password?: string) => {
+    // Set loading while we process
+    setLoading(true);
+    
+    // Persist session first
+    localStorage.setItem('isAuthenticated', 'true');
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(newUser));
+
     setToken(newToken);
     setUser(newUser);
     
@@ -64,10 +72,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLocked(true);
     }
 
-    // Persist session
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(newUser));
+    // Done processing
+    setLoading(false);
   };
 
   const logout = () => {

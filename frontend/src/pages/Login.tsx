@@ -11,7 +11,7 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLocked, setIsLocked] = useState(false);
-  const { login, user } = useAuth();
+  const { login, user, loading, isLocked: globalIsLocked } = useAuth();
 
   const navigate = useNavigate();
 
@@ -38,13 +38,22 @@ const Login: React.FC = () => {
   }, [login, navigate]);
 
   // If a user is already in state but we show login, we can offer the "Unlock" screen
+  // If a user is already in state but we show login, we can offer the "Unlock" screen
   useEffect(() => {
     const savedEmail = localStorage.getItem('last_user_email') || (user?.email);
-    if (savedEmail) {
+    if (savedEmail && !user) { // Only show local lock if not officially logged in
       setEmail(savedEmail);
       setIsLocked(true);
     }
   }, [user]);
+
+  // If already authenticated, redirect away from login
+  useEffect(() => {
+    if (user && !loading) {
+      console.log('[DEBUG] User is already authenticated, redirecting away from login');
+      navigate(globalIsLocked ? '/vault-lock' : '/dashboard', { replace: true });
+    }
+  }, [user, loading, globalIsLocked, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
