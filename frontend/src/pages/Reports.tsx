@@ -47,15 +47,14 @@ const Reports: React.FC = () => {
   };
 
   const analyze = (itemsList: VaultItem[]) => {
-    const masterPassword = sessionStorage.getItem('masterPassword') || '';
 
     const weak: VaultItem[] = [];
     const passwordMap: { [key: string]: VaultItem[] } = {};
     const unsecured: VaultItem[] = [];
 
     itemsList.forEach(item => {
-      // Decrypt password
-      const plainPassword = item.password ? decrypt(item.password, masterPassword) : '';
+      // Decrypt password using automated system key
+      const plainPassword = item.password ? decrypt(item.password) : '';
 
       // 1. Check Weak
       if (plainPassword && (plainPassword.length < 8 || !/\d/.test(plainPassword) || !/[!@#$%^&*(),.?":{}|<>]/.test(plainPassword))) {
