@@ -22,7 +22,6 @@ import {
   Layers,
   Star,
   ChevronDown,
-  Lock,
   Trash2,
   Shield,
   LogOut,
@@ -68,7 +67,7 @@ interface CollectionItem {
 }
 
 const Dashboard: React.FC = () => {
-  const { token, user, unlock, lock, logout } = useAuth();
+  const { token, user, logout } = useAuth();
   const [items, setItems] = useState<VaultItem[]>([]);
   const [folders, setFolders] = useState<FolderItem[]>([]);
   const [collections, setCollections] = useState<CollectionItem[]>([]);
@@ -117,10 +116,7 @@ const Dashboard: React.FC = () => {
   const [newLicenseNumber, setNewLicenseNumber] = useState('');
   const [newCustomFields, setNewCustomFields] = useState<{name: string, value: string}[]>([]);
 
-  // Verification modal state
-  const [isVerifyingMaster, setIsVerifyingMaster] = useState(false);
-  const [masterPasswordInput, setMasterPasswordInput] = useState('');
-  const [verificationError, setVerificationError] = useState('');
+  // Selected Field State
   const [revealField, setRevealField] = useState<'password' | 'cardNumber' | 'cvv' | 'licenseNumber'>('password');
 
   // Delete Confirmation State
@@ -174,57 +170,32 @@ const Dashboard: React.FC = () => {
       return;
     }
     setRevealField(field);
-    setIsVerifyingMaster(true);
-    setVerificationError('');
-    setMasterPasswordInput('');
-  };
-
-  const verifyMasterPassword = async () => {
+    setShowPassword(true);
+    
+    // Log the reveal event
     try {
-      // 1. Verify against server (for security)
-      const response = await api.post('/api/auth/verify-master', {
-        userId: user?.id,
-        password: masterPasswordInput
+      await api.post('/api/logs', {
+        action: 'REVEAL',
+        itemId: selectedItem?.id,
+        details: `${field} revealed for ${selectedItem?.name}`
       });
-
-      if (response.data.valid) {
-        // 2. Unlock in context (stores in sessionStorage)
-        await unlock(masterPasswordInput);
-        
-        setIsVerifyingMaster(false);
-        setMasterPasswordInput('');
-        setVerificationError('');
-
-        // 3. If it was a reveal request
-        if (revealField) {
-          setShowPassword(true);
-          await api.post('/api/logs', {
-             action: 'REVEAL',
-             itemId: selectedItem?.id,
-             details: `${revealField} revealed for ${selectedItem?.name}`
-          }, { /* Global headers handled by api.ts */ });
-        }
-
-      } else {
-        setVerificationError('Invalid master password');
-      }
-    } catch (err) {
-      setVerificationError('Verification failed');
+    } catch (e) {
+      console.error('Failed to log reveal');
     }
   };
 
 
 
+
+
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
-    const masterPassword = sessionStorage.getItem('masterPassword') || '';
-    
     try {
-      const encryptedPassword = newPassword ? encrypt(newPassword, masterPassword) : '';
-      const encryptedNotes = newNotes ? encrypt(newNotes, masterPassword) : '';
-      const encryptedCardNumber = newCardNumber ? encrypt(newCardNumber, masterPassword) : '';
-      const encryptedCvv = newCvv ? encrypt(newCvv, masterPassword) : '';
-      const encryptedLicense = newLicenseNumber ? encrypt(newLicenseNumber, masterPassword) : '';
+      const encryptedPassword = newPassword ? encrypt(newPassword) : '';
+      const encryptedNotes = newNotes ? encrypt(newNotes) : '';
+      const encryptedCardNumber = newCardNumber ? encrypt(newCardNumber) : '';
+      const encryptedCvv = newCvv ? encrypt(newCvv) : '';
+      const encryptedLicense = newLicenseNumber ? encrypt(newLicenseNumber) : '';
 
       await api.post('/api/vault', {
         name: newName,
@@ -247,7 +218,7 @@ const Dashboard: React.FC = () => {
         address: newAddress,
         phone: newPhone,
         licenseNumber: encryptedLicense,
-        customFields: newCustomFields.map(f => ({ name: f.name, value: f.value ? encrypt(f.value, masterPassword) : '' }))
+        customFields: newCustomFields.map(f => ({ name: f.name, value: f.value ? encrypt(f.value) : '' }))
       });
 
       setIsAdding(false);
@@ -381,8 +352,7 @@ const Dashboard: React.FC = () => {
 
   const getDecryptedValue = (ciphertext: string) => {
     if (!ciphertext) return '';
-    const masterPassword = sessionStorage.getItem('masterPassword') || '';
-    return decrypt(ciphertext, masterPassword);
+    return decrypt(ciphertext);
   };
 
   const filteredItems = items.filter(item => {
@@ -528,13 +498,7 @@ const Dashboard: React.FC = () => {
                   <p className="text-[10px] text-slate-400 font-bold truncate pl-11">{user?.email}</p>
                 </div>
                 <div className="p-2">
-                  <button 
-                    onClick={() => { lock(); setShowProfileMenu(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-colors"
-                  >
-                    <Lock size={16} className="text-slate-400" />
-                    Lock Vault
-                  </button>
+
                   <div className="h-px bg-gray-50 mx-2 my-1"></div>
                   <button 
                     onClick={() => { logout(); setShowProfileMenu(false); }}
@@ -1289,48 +1253,7 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Master Password Verification Modal */}
-      {isVerifyingMaster && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] backdrop-blur-sm">
-           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
-              <div className="flex items-center gap-3 mb-6">
-                 <Lock className="text-[#175ddc]" size={24} />
-                 <h2 className="text-xl font-bold text-gray-800">Master Password Required</h2>
-              </div>
-              <p className="text-sm text-gray-600 mb-6">
-                 To reveal this secure data, please re-enter your master password for security.
-              </p>
-              <div className="space-y-4">
-                 <div>
-                    <input 
-                      type="password" 
-                      placeholder="Master Password" 
-                      className="input-field"
-                      autoFocus
-                      value={masterPasswordInput}
-                      onChange={e => setMasterPasswordInput(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && verifyMasterPassword()}
-                    />
-                    {verificationError && <p className="text-red-500 text-xs mt-1 font-bold">{verificationError}</p>}
-                 </div>
-                 <div className="flex gap-3 mt-8">
-                    <button 
-                      onClick={() => setIsVerifyingMaster(false)}
-                      className="flex-1 px-4 py-2 text-gray-600 font-bold hover:bg-gray-50 rounded"
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      onClick={verifyMasterPassword}
-                      className="flex-1 bg-[#175ddc] text-white font-bold py-2 rounded hover:bg-[#134db8]"
-                    >
-                      Unlock
-                    </button>
-                 </div>
-              </div>
-           </div>
-        </div>
-      )}
+
     </div>
   );
 };

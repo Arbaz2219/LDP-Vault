@@ -26,7 +26,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [isLocked, setIsLocked] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,10 +36,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const parsedUser = JSON.parse(savedUser);
         setToken(savedToken);
         setUser(parsedUser);
-        
-        // On refresh, we should be locked unless we have the master password in session
-        const hasMasterPassword = sessionStorage.getItem('masterPassword');
-        setIsLocked(!hasMasterPassword);
       } catch (e) {
         console.error('Failed to restore session:', e);
         localStorage.removeItem('token');
@@ -51,97 +46,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   }, []);
 
-  const login = (newToken: string, newUser: User, password?: string) => {
-    // Set loading while we process
-    setLoading(true);
-    
-    // Persist session first
+  const login = (newToken: string, newUser: User) => {
     localStorage.setItem('isAuthenticated', 'true');
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(newUser));
 
     setToken(newToken);
     setUser(newUser);
-    
-    // If we have a password (manual login), we can unlock. 
-    // If not (SSO), we stay locked so user must provide master password to decrypt data.
-    if (password) {
-      setIsLocked(false);
-      sessionStorage.setItem('masterPassword', password);
-    } else {
-      setIsLocked(true);
-    }
-
-    // Done processing
     setLoading(false);
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
-    setIsLocked(true);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('isAuthenticated');
     sessionStorage.removeItem('masterPassword');
   };
 
-  const unlock = async (password: string): Promise<boolean> => {
-    // In a real LDP Vault clone, we'd use this password to derive a key
-    // and try to decrypt a "symmetric key" stored in the vault.
-    // For this prototype, we'll just simulate a successful unlock.
-    // We should ideally verify it against the server if not already verified.
-    
-    // Simulate verification
-    setIsLocked(false);
-    sessionStorage.setItem('masterPassword', password); // Store only for current session
-    return true;
-  };
-
-  const lock = () => {
-    setIsLocked(true);
-    sessionStorage.removeItem('masterPassword');
-  };
-
-  const setIsMasterPasswordSet = (value: boolean) => {
-    if (user) {
-      const updatedUser = { ...user, isMasterPasswordSet: value };
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-    }
-  };
-
-  // Auto-lock after 3 minutes of inactivity
-  useEffect(() => {
-    let timeout: any;
-
-    const resetTimer = () => {
-      if (timeout) clearTimeout(timeout);
-      // 5 minutes = 300,000 milliseconds
-      timeout = setTimeout(() => {
-        if (token && !isLocked) {
-          lock();
-        }
-      }, 300000);
-    };
-
-    if (token && !isLocked) {
-      window.addEventListener('mousemove', resetTimer);
-      window.addEventListener('keydown', resetTimer);
-      window.addEventListener('click', resetTimer);
-      resetTimer();
-    }
-
-    return () => {
-      window.removeEventListener('mousemove', resetTimer);
-      window.removeEventListener('keydown', resetTimer);
-      window.removeEventListener('click', resetTimer);
-      if (timeout) clearTimeout(timeout);
-    };
-  }, [token, isLocked]);
+  const unlock = async () => true;
+  const lock = () => {};
+  const setIsMasterPasswordSet = () => {};
 
   return (
-    <AuthContext.Provider value={{ user, token, isLocked, loading, login, logout, unlock, lock, setIsMasterPasswordSet }}>
+    <AuthContext.Provider value={{ user, token, isLocked: false, loading, login, logout, unlock, lock, setIsMasterPasswordSet }}>
       {children}
     </AuthContext.Provider>
   );

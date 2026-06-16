@@ -42,12 +42,15 @@ api.interceptors.response.use(
     if (status === 401 || status === 403) {
       console.warn(`[API] Authorization failed (${status}) for request: ${url}`);
       
-      const hasToken = !!localStorage.getItem('token');
+      const token = localStorage.getItem('token');
+      const hasToken = !!token;
       const isActuallyAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
 
       // Only redirect if we ARE NOT on login/vault-lock AND we think we should be authenticated
       const currentPath = window.location.pathname;
       const shouldBeAtLogin = currentPath.includes('/login') || currentPath.includes('/vault-lock');
+
+      console.log('[API] Check:', { currentPath, shouldBeAtLogin, hasToken, isActuallyAuthenticated });
 
       if (!shouldBeAtLogin && (hasToken || isActuallyAuthenticated)) {
         console.error('[API] Active session rejected. Clearing state and redirecting to login...');
@@ -55,7 +58,12 @@ api.interceptors.response.use(
         localStorage.removeItem('user');
         localStorage.removeItem('isAuthenticated');
         sessionStorage.removeItem('masterPassword');
-        window.location.href = '/login';
+        
+        // Use a flag to avoid multiple reloads
+        if (!window.sessionStorage.getItem('auth_redirect_in_progress')) {
+          window.sessionStorage.setItem('auth_redirect_in_progress', 'true');
+          window.location.href = '/login';
+        }
       }
     }
 

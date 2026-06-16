@@ -3,16 +3,16 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Lock } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
-import VaultLock from './pages/VaultLock';
 import Dashboard from './pages/Dashboard';
 import AdminConsole from './pages/AdminConsole';
 import Send from './pages/Send';
 import Tools from './pages/Tools';
 import Reports from './pages/Reports';
+import SSOCallback from './pages/SSOCallback';
 import Layout from './components/Layout';
 
 const AppContent: React.FC = () => {
-  const { user, loading, isLocked } = useAuth();
+  const { user, loading } = useAuth();
   const hasToken = !!localStorage.getItem('token');
   
   if ((loading && hasToken) || (hasToken && !user)) {
@@ -36,6 +36,7 @@ const AppContent: React.FC = () => {
     return (
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/sso-callback" element={<SSOCallback />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
@@ -44,14 +45,7 @@ const AppContent: React.FC = () => {
   const hasVaultAccess = user.portals?.includes('vault');
   const hasAdminAccess = user.portals?.includes('admin') || user.role === 'ADMIN';
 
-  if (isLocked) {
-    return (
-      <Routes>
-        <Route path="/vault-lock" element={<VaultLock />} />
-        <Route path="*" element={<Navigate to="/vault-lock" replace />} />
-      </Routes>
-    );
-  }
+  // If user has NO portal access, show a restricted access state or logout
 
   // If user has NO portal access, show a restricted access state or logout
   if (!hasVaultAccess && !hasAdminAccess) {

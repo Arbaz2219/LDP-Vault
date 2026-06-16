@@ -2,58 +2,17 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../index';
-import { msalClient, REDIRECT_URI } from '../utils/microsoftAuth';
+import { msalClient, getRedirectUri } from '../utils/microsoftAuth';
 
 const router = Router();
 import { JWT_SECRET, FRONTEND_URL } from '../config';
 
-// Register
-router.post('/register', async (req, res) => {
-  try {
-    const { email, password, name, organizationName } = req.body;
-
-    if (!email || !password || !name) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-
-    const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
-    }
-
-    const masterPasswordHash = await bcrypt.hash(password, 10);
-
-    let organizationId = null;
-    let isNewOrg = false;
-    if (organizationName) {
-      let org = await prisma.organization.findFirst({ where: { name: organizationName } });
-      if (!org) {
-        org = await prisma.organization.create({ data: { name: organizationName } });
-        isNewOrg = true;
-      }
-      organizationId = org.id;
-    }
-
-    const user = await prisma.user.create({
-      data: {
-        email,
-        masterPasswordHash,
-        name,
-        organizationId,
-        role: isNewOrg ? 'ADMIN' : 'USER'
-      },
-    });
-
-    const token = jwt.sign({ userId: user.id, email: user.email, role: user.role, portals: user.portals }, JWT_SECRET, { expiresIn: '8h' });
-
-    res.status(201).json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role, portals: user.portals } });
-  } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+// Standard Registration (Disabled - SSO Only)
+router.post('/register', (req, res) => {
+  res.status(403).json({ error: 'Standard registration is disabled. Please use SSO.' });
 });
 
-// Login
+// Standard Login (Re-enabled as fallback)
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -86,40 +45,9 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Verify Master Password (for re-auth)
-router.post('/verify-master', async (req, res) => {
-  try {
-    const { userId, password } = req.body;
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user || !user.masterPasswordHash) return res.status(404).json({ error: 'User not found or password not set' });
-
-    const isValid = await bcrypt.compare(password, user.masterPasswordHash);
-    res.json({ valid: isValid });
-  } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Set Master Password (first time for SSO users)
-router.post('/set-master', async (req, res) => {
-  try {
-    const { userId, password } = req.body;
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    if (user.masterPasswordHash) return res.status(400).json({ error: 'Master password already set' });
-
-    const hash = await bcrypt.hash(password, 10);
-    await prisma.user.update({
-      where: { id: userId },
-      data: { masterPasswordHash: hash }
-    });
-
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+// Master Password Management (Disabled)
+router.post('/verify-master', (req, res) => res.status(403).json({ error: 'Disabled' }));
+router.post('/set-master', (req, res) => res.status(403).json({ error: 'Disabled' }));
 
 
 
@@ -127,7 +55,7 @@ router.post('/set-master', async (req, res) => {
 router.get('/microsoft', async (req, res) => {
   const authCodeUrlParameters = {
     scopes: ["user.read"],
-    redirectUri: REDIRECT_URI,
+    redirectUri: getRedirectUri(req),
     prompt: "select_account",
   };
 
@@ -142,10 +70,13 @@ router.get('/microsoft', async (req, res) => {
 
 // Microsoft SSO Callback
 router.get('/microsoft/callback', async (req, res) => {
+  const redirectUri = getRedirectUri(req);
+  console.log('[AUTH] Callback received. Using Redirect URI:', redirectUri);
+
   const tokenRequest = {
     code: req.query.code as string,
     scopes: ["user.read"],
-    redirectUri: REDIRECT_URI,
+    redirectUri: redirectUri,
   };
 
   try {
@@ -178,8 +109,7 @@ router.get('/microsoft/callback', async (req, res) => {
       userId: user.id, 
       email: user.email, 
       role: user.role,
-      portals: user.portals,
-      isMasterPasswordSet: !!user.masterPasswordHash
+      portals: user.portals
     }, JWT_SECRET, { expiresIn: '8h' });
 
     // Audit Log: SSO Successful Login
@@ -193,12 +123,15 @@ router.get('/microsoft/callback', async (req, res) => {
 
     // Redirect back to frontend with token
     // Detect if we should use the domain or keep localhost for dev
-    const useDomain = process.env.FRONTEND_DOMAIN && !req.get('host')?.includes('localhost');
-    const frontendUrl = useDomain 
+    const host = req.get('host') || '';
+    // Use production domain only if we are clearly on the production API host
+    const isProduction = process.env.API_DOMAIN && host.startsWith(process.env.API_DOMAIN);
+
+    const frontendUrl = isProduction 
       ? `https://${process.env.FRONTEND_DOMAIN}` 
       : (FRONTEND_URL || 'http://localhost:5173');
     
-    const finalRedirectUrl = `${frontendUrl}/login?token=${token}&user=${encodeURIComponent(JSON.stringify({
+    const finalRedirectUrl = `${frontendUrl}/sso-callback?token=${token}&user=${encodeURIComponent(JSON.stringify({
       id: user.id,
       email: user.email,
       name: user.name,
@@ -206,7 +139,9 @@ router.get('/microsoft/callback', async (req, res) => {
       portals: user.portals
     }))}`;
 
-    console.log(`[AUTH] SSO success for ${email}. Redirecting to ${frontendUrl}/login`);
+    console.log(`[AUTH] SSO success for ${email}.`);
+    console.log(`[AUTH] Host: ${host}, isProduction: ${isProduction}`);
+    console.log(`[AUTH] Frontend Base URL: ${frontendUrl}`);
     console.log(`[AUTH] Full Redirect URL: ${finalRedirectUrl}`);
     
     res.redirect(finalRedirectUrl);
