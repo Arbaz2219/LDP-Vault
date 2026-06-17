@@ -413,13 +413,16 @@ const Dashboard: React.FC = () => {
               <Globe size={size/4} />}
           </div>
           <img 
-            src={`https://logo.clearbit.com/${domain}?size=${size}`} 
+            src={`https://${domain}/favicon.ico`} 
             className="w-full h-full object-contain p-1 z-10 bg-white" 
             alt=""
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              if (target.src.includes('clearbit')) {
-                // Secondary attempt with Google
+              if (target.src.includes('favicon.ico')) {
+                // Secondary attempt with Clearbit
+                target.src = `https://logo.clearbit.com/${domain}?size=${size}`;
+              } else if (target.src.includes('clearbit')) {
+                // Third attempt with Google
                 target.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=${size}`;
               } else {
                 target.style.display = 'none';
