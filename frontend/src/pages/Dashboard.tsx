@@ -379,6 +379,7 @@ const Dashboard: React.FC = () => {
 
   const getIcon = (type: string, url?: string, name?: string, size: number = 64) => {
     let domain = '';
+    let guessDomain = '';
     
     const extractDomain = (str: string) => {
       try {
@@ -394,17 +395,23 @@ const Dashboard: React.FC = () => {
 
     if (url) {
       domain = extractDomain(url);
-    } else if (name && type === 'login') {
-      // Smart Guess: If no URL, try to guess from the name
-      domain = name.trim().toLowerCase().replace(/\s+/g, '') + '.com';
+    }
+    
+    if (name && type === 'login') {
+      // Smart Guess Pattern 1: No spaces, just .com
+      guessDomain = name.trim().toLowerCase().replace(/\s+/g, '') + '.com';
+      if (!domain) domain = guessDomain;
     }
 
     const iconBaseClass = "w-full h-full flex items-center justify-center";
 
     if (domain && domain.includes('.') && domain.length > 3) {
+      const googleUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=${size}`;
+      const clearbitUrl = `https://logo.clearbit.com/${domain}?size=${size}`;
+      const duckUrl = `https://icons.duckduckgo.com/ip3/${domain}.ico`;
+
       return (
         <div className={iconBaseClass + " relative"}>
-          {/* Base Fallback Icon (Behind Image) */}
           <div className="absolute inset-0 flex items-center justify-center text-gray-200">
              {type === 'card' ? <CreditCard size={size/4} /> : 
               type === 'identity' ? <User size={size/4} /> :
@@ -413,17 +420,18 @@ const Dashboard: React.FC = () => {
               <Globe size={size/4} />}
           </div>
           <img 
-            src={`https://${domain}/favicon.ico`} 
-            className="w-full h-full object-contain p-1 z-10 bg-white" 
+            src={clearbitUrl} 
+            className="w-full h-full object-contain p-1 z-10 bg-white rounded-sm" 
             alt=""
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              if (target.src.includes('favicon.ico')) {
-                // Secondary attempt with Clearbit
-                target.src = `https://logo.clearbit.com/${domain}?size=${size}`;
-              } else if (target.src.includes('clearbit')) {
-                // Third attempt with Google
-                target.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=${size}`;
+              if (target.src === clearbitUrl) {
+                target.src = googleUrl;
+              } else if (target.src === googleUrl) {
+                target.src = duckUrl;
+              } else if (target.src === duckUrl && guessDomain && domain !== guessDomain) {
+                // If all failed for URL domain, try the name-guessed domain
+                target.src = `https://logo.clearbit.com/${guessDomain}?size=${size}`;
               } else {
                 target.style.display = 'none';
               }
