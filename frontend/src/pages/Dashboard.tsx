@@ -376,43 +376,45 @@ const Dashboard: React.FC = () => {
     return true;
   });
 
-  const getIcon = (type: string, url?: string, size: number = 64) => {
+  const getIcon = (type: string, url?: string, name?: string, size: number = 64) => {
     let domain = '';
-    if (url) {
+    
+    const extractDomain = (str: string) => {
       try {
-        // Clean the URL to extract the bare domain
-        let cleanUrl = url.trim().toLowerCase();
-        
-        // Handle emails
-        if (cleanUrl.includes('@') && !cleanUrl.includes('/')) {
-           domain = cleanUrl.split('@')[1];
-        } else {
-           // Ensure it has a protocol for the URL constructor
-           if (!cleanUrl.startsWith('http')) {
-             cleanUrl = 'https://' + cleanUrl;
-           }
-           const urlObj = new URL(cleanUrl);
-           domain = urlObj.hostname.replace('www.', '');
-        }
+        let clean = str.trim().toLowerCase();
+        if (clean.includes('@') && !clean.includes('/')) return clean.split('@')[1];
+        if (!clean.includes('.') || clean.length < 4) return '';
+        if (!clean.startsWith('http')) clean = 'https://' + clean;
+        return new URL(clean).hostname.replace('www.', '');
       } catch (e) {
-        // Fallback for partial domains like "facebook.com"
-        domain = url.toLowerCase().split('/')[0].replace('www.', '');
+        return str.toLowerCase().split('/')[0].replace('www.', '');
       }
+    };
+
+    if (url) {
+      domain = extractDomain(url);
+    } else if (name && type === 'login') {
+      // Smart Guess: If no URL, try to guess from the name
+      domain = name.trim().toLowerCase().replace(/\s+/g, '') + '.com';
     }
 
-    // List of common types that shouldn't show a generic globe
     const iconBaseClass = "w-full h-full flex items-center justify-center";
 
     if (domain && domain.includes('.') && domain.length > 3) {
       return (
         <div className={iconBaseClass}>
           <img 
-            src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${size}`} 
+            src={`https://logo.clearbit.com/${domain}?size=${size}`} 
             className="w-full h-full object-contain p-1" 
             alt=""
             onError={(e) => {
-              (e.target as HTMLImageElement).style.display = 'none';
-              // Should we show a fallback icon? The parent container will show through
+              // If Clearbit fails, try Google Favicon as fallback
+              const target = e.target as HTMLImageElement;
+              if (target.src.includes('clearbit')) {
+                target.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=${size}`;
+              } else {
+                target.style.display = 'none';
+              }
             }}
           />
         </div>
@@ -711,7 +713,7 @@ const Dashboard: React.FC = () => {
                 >
                   <input type="checkbox" className="rounded" />
                   <div className="w-10 h-10 rounded border border-gray-200 flex items-center justify-center text-gray-400 bg-white overflow-hidden">
-                    {getIcon(item.type, item.url)}
+                    {getIcon(item.type, item.url, item.name)}
                   </div>
                   <div className="flex-1">
                     <p className="font-bold text-gray-800 text-sm">{item.name}</p>
@@ -806,7 +808,7 @@ const Dashboard: React.FC = () => {
                             <input type="text" className="input-field" value={newUrl} onChange={e => setNewUrl(e.target.value)} placeholder="e.g. google.com" />
                             {newUrl && (
                                <div className="w-10 h-10 border border-gray-200 rounded flex items-center justify-center bg-gray-50 shrink-0 overflow-hidden" title="Icon Preview">
-                                 {getIcon('login', newUrl)}
+                                 {getIcon('login', newUrl, newName)}
                                </div>
                             )}
                           </div>
@@ -986,9 +988,9 @@ const Dashboard: React.FC = () => {
                   ) : selectedItem && (
                     <div className="space-y-8">
                        <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 rounded-lg border border-gray-100 flex items-center justify-center bg-gray-50 text-gray-400 group-hover:bg-white transition-colors overflow-hidden">
-                          {getIcon(selectedItem.type, selectedItem.url)}
-                        </div>
+                          <div className="w-14 h-14 rounded-xl border border-gray-100 shadow-sm flex items-center justify-center bg-white text-gray-400 transition-all overflow-hidden shrink-0">
+                            {getIcon(selectedItem.type, selectedItem.url, selectedItem.name, 128)}
+                          </div>
                           <div>
                             <h2 className="text-2xl font-bold text-gray-800 leading-tight">{selectedItem.name}</h2>
                             <p className="text-sm text-gray-500 uppercase mt-1">{selectedItem.type}</p>
