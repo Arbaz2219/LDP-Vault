@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -8,15 +8,13 @@ import {
   BarChart2, 
   Settings, 
   LayoutDashboard, 
-  LogOut,
   Lock
 } from 'lucide-react';
 import LDPLogo from './LDPLogo';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { logout, lock, user } = useAuth();
+  const { user } = useAuth();
   const location = useLocation();
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const isAdmin = user?.role === 'ADMIN' || user?.portals?.includes('admin');
   const hasVault = user?.portals?.includes('vault');
@@ -85,51 +83,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </Link>
           )}
 
-          {/* Premium User Widget with Dropdown */}
-          <div className="pt-6 pb-2 px-1 relative">
-             {showProfileMenu && (
-               <div className="absolute bottom-full left-4 mb-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] animate-in slide-in-from-bottom-2 duration-200">
-                  <div className="p-4 border-b border-gray-50 bg-gray-50/50">
-                    <p className="text-xs font-black text-slate-800 truncate uppercase tracking-tighter">{user?.name}</p>
-                    <p className="text-[10px] text-slate-400 font-bold truncate">{user?.email}</p>
-                  </div>
-                  <div className="p-2">
-                    <button 
-                      onClick={() => { lock(); setShowProfileMenu(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
-                    >
-                      <Lock size={14} className="text-slate-400" />
-                      Lock Vault
-                    </button>
-                    <button 
-                      onClick={() => { logout(); setShowProfileMenu(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <LogOut size={14} className="text-red-400" />
-                      Log Out
-                    </button>
-                  </div>
-               </div>
-             )}
-
-             <div 
-               onClick={() => setShowProfileMenu(!showProfileMenu)}
-               className={`bg-black/15 backdrop-blur-md p-3 rounded-2xl border border-white/5 flex items-center justify-between group cursor-pointer transition-all ${showProfileMenu ? 'ring-2 ring-white/20 bg-black/25' : 'hover:bg-black/20'}`}
-             >
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 shadow-lg flex items-center justify-center text-white font-black text-sm shrink-0 border border-white/20">
-                    {user?.name?.[0].toUpperCase()}
-                  </div>
-                  <div className="truncate">
-                    <p className="text-[11px] font-black text-white truncate uppercase tracking-tighter">{user?.name}</p>
-                    <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest">Premium User</p>
-                  </div>
-                </div>
-                <div className="flex flex-col items-center justify-center text-white/40 group-hover:text-white transition-colors">
-                  <Settings size={14} className={showProfileMenu ? 'rotate-90 transition-transform' : ''} />
-                </div>
-             </div>
-          </div>
         </div>
       </aside>
 

@@ -25,6 +25,7 @@ import {
   Trash2,
   Shield,
   LogOut,
+  Settings,
 } from 'lucide-react';
 
 import LDPLogo from '../components/LDPLogo';
@@ -402,15 +403,23 @@ const Dashboard: React.FC = () => {
 
     if (domain && domain.includes('.') && domain.length > 3) {
       return (
-        <div className={iconBaseClass}>
+        <div className={iconBaseClass + " relative"}>
+          {/* Base Fallback Icon (Behind Image) */}
+          <div className="absolute inset-0 flex items-center justify-center text-gray-200">
+             {type === 'card' ? <CreditCard size={size/4} /> : 
+              type === 'identity' ? <User size={size/4} /> :
+              type === 'note' ? <FileText size={size/4} /> :
+              type === 'ssh' ? <Terminal size={size/4} /> :
+              <Globe size={size/4} />}
+          </div>
           <img 
             src={`https://logo.clearbit.com/${domain}?size=${size}`} 
-            className="w-full h-full object-contain p-1" 
+            className="w-full h-full object-contain p-1 z-10 bg-white" 
             alt=""
             onError={(e) => {
-              // If Clearbit fails, try Google Favicon as fallback
               const target = e.target as HTMLImageElement;
               if (target.src.includes('clearbit')) {
+                // Secondary attempt with Google
                 target.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=${size}`;
               } else {
                 target.style.display = 'none';
@@ -422,11 +431,11 @@ const Dashboard: React.FC = () => {
     }
 
     switch (type) {
-      case 'card': return <div className={iconBaseClass}><CreditCard size={size/4} /></div>;
-      case 'identity': return <div className={iconBaseClass}><User size={size/4} /></div>;
-      case 'note': return <div className={iconBaseClass}><FileText size={size/4} /></div>;
-      case 'ssh': return <div className={iconBaseClass}><Terminal size={size/4} /></div>;
-      default: return <div className={iconBaseClass}><Globe size={size/4} className="text-gray-200" /></div>;
+      case 'card': return <div className={iconBaseClass}><CreditCard size={size/4} className="text-gray-300" /></div>;
+      case 'identity': return <div className={iconBaseClass}><User size={size/4} className="text-gray-300" /></div>;
+      case 'note': return <div className={iconBaseClass}><FileText size={size/4} className="text-gray-300" /></div>;
+      case 'ssh': return <div className={iconBaseClass}><Terminal size={size/4} className="text-gray-300" /></div>;
+      default: return <div className={iconBaseClass}><Globe size={size/4} className="text-gray-300" /></div>;
     }
   };
 
@@ -497,7 +506,7 @@ const Dashboard: React.FC = () => {
           <div className="relative">
             <div 
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 shadow-lg flex items-center justify-center text-white font-black text-sm shrink-0 border border-white/20 cursor-pointer hover:scale-105 transition-transform"
+              className="w-10 h-10 rounded-xl bg-[#0d43af] shadow-lg flex items-center justify-center text-white font-black text-sm shrink-0 border border-white/20 cursor-pointer hover:scale-105 transition-transform"
               title="Profile & Settings"
             >
               {user?.name?.[0].toUpperCase()}
@@ -515,7 +524,14 @@ const Dashboard: React.FC = () => {
                   <p className="text-[10px] text-slate-400 font-bold truncate pl-11">{user?.email}</p>
                 </div>
                 <div className="p-2">
-
+                  <Link 
+                    to="/settings"
+                    onClick={() => setShowProfileMenu(false)}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-colors"
+                  >
+                    <Settings size={16} className="text-slate-400" />
+                    Account Settings
+                  </Link>
                   <div className="h-px bg-gray-50 mx-2 my-1"></div>
                   <button 
                     onClick={() => { logout(); setShowProfileMenu(false); }}
