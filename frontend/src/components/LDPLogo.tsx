@@ -36,15 +36,15 @@ const LDPLogo: React.FC<{ className?: string; hideText?: boolean; variant?: 'def
           stroke={isWhite ? "#ffffff" : strokeColor} 
           strokeWidth="4"
         />
-        {/* Padlock inner plate illustrating the password dots/keyhole area */}
+        {/* Padlock inner plate - using Professional Gold accent for security feel */}
         <rect 
           x="28" 
           y="48" 
           width="44" 
           height="20" 
           rx="6" 
-          fill={isWhite ? "#0d43af" : "#fecb2f"} 
-          stroke={isWhite ? "#0d43af" : strokeColor} 
+          fill="#fcc419" 
+          stroke={isWhite ? "#fcc419" : strokeColor} 
           strokeWidth="2"
         />
         <text 
@@ -53,7 +53,7 @@ const LDPLogo: React.FC<{ className?: string; hideText?: boolean; variant?: 'def
           fontFamily="monospace" 
           fontSize="16" 
           fontWeight="900" 
-          fill={isWhite ? "#ffffff" : "#1d2736"} 
+          fill="#1d2736" 
           textAnchor="middle" 
           letterSpacing="2"
         >
