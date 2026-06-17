@@ -128,7 +128,7 @@ const Login: React.FC = () => {
               onClick={handleMicrosoftLogin}
               className="w-full flex items-center justify-center gap-4 bg-white hover:bg-gray-50 text-[#1d2736] font-bold py-5 px-8 rounded-2xl border-2 border-[#e6ebf1] transition-all hover:border-[#cbd5e1] hover:shadow-lg active:scale-95 group mb-4"
             >
-               <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" className="w-6 h-6 grayscale group-hover:grayscale-0 transition-all" alt="Microsoft" />
+               <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" className="w-6 h-6 transition-all" alt="Microsoft" />
                <span className="text-sm uppercase tracking-widest">Sign in with Microsoft</span>
             </button>
             
