@@ -56,8 +56,8 @@ const Login: React.FC = () => {
         </div>
         
         <div className="mt-16 text-center z-10 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <h2 className="text-white/60 text-xs font-bold tracking-[0.4em] uppercase">Enterprise Vault System</h2>
-          <div className="h-px w-12 bg-white/20 mx-auto mt-4"></div>
+          <h2 className="text-white text-xs font-bold tracking-[0.4em] uppercase">Enterprise Edition</h2>
+          <div className="h-px w-12 bg-white mx-auto mt-4"></div>
         </div>
       </div>
 

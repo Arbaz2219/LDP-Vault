@@ -70,11 +70,11 @@ const LDPLogo: React.FC<{ className?: string; hideText?: boolean; variant?: 'def
         <div className="flex flex-col items-center w-full">
           <h1 className={`${isWhite ? 'text-white' : 'text-[#0d43af]'} font-[900] text-[1.6em] tracking-tighter leading-none`}>LDP VAULT</h1>
           <div className="flex items-center gap-1 w-full mt-1">
-             <div className={`h-[2px] flex-1 ${isWhite ? 'bg-white' : 'bg-[#0d43af]'} opacity-30`}></div>
+             <div className={`h-[2px] flex-1 ${isWhite ? 'bg-white' : 'bg-[#0d43af]'} ${isWhite ? '' : 'opacity-30'}`}></div>
              <span className={`${isWhite ? 'text-white' : 'text-[#0d43af]'} text-[0.45em] font-bold tracking-[0.2em] uppercase`}>LOCK</span>
-             <div className={`h-[2px] flex-1 ${isWhite ? 'bg-white' : 'bg-[#0d43af]'} opacity-30`}></div>
+             <div className={`h-[2px] flex-1 ${isWhite ? 'bg-white' : 'bg-[#0d43af]'} ${isWhite ? '' : 'opacity-30'}`}></div>
           </div>
-          <p className={`${isWhite ? 'text-white' : 'text-[#0d43af]'} text-[0.4em] font-bold tracking-[0.3em] mt-1 opacity-90`}>SECURE • STORE • PROTECT</p>
+          <p className={`${isWhite ? 'text-white' : 'text-[#0d43af]'} text-[0.4em] font-bold tracking-[0.3em] mt-1 ${isWhite ? '' : 'opacity-90'}`}>SECURE • STORE • PROTECT</p>
         </div>
       )}
 
