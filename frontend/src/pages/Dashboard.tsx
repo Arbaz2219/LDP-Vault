@@ -376,40 +376,55 @@ const Dashboard: React.FC = () => {
     return true;
   });
 
-  const getIcon = (type: string, url?: string) => {
+  const getIcon = (type: string, url?: string, size: number = 64) => {
     let domain = '';
     if (url) {
       try {
-        // Handle emails slightly differently to extract the domain
-        if (url.includes('@') && !url.includes('/')) {
-           domain = url.split('@')[1].toLowerCase();
+        // Clean the URL to extract the bare domain
+        let cleanUrl = url.trim().toLowerCase();
+        
+        // Handle emails
+        if (cleanUrl.includes('@') && !cleanUrl.includes('/')) {
+           domain = cleanUrl.split('@')[1];
         } else {
-           domain = new URL(url.startsWith('http') ? url : `https://${url}`).hostname;
+           // Ensure it has a protocol for the URL constructor
+           if (!cleanUrl.startsWith('http')) {
+             cleanUrl = 'https://' + cleanUrl;
+           }
+           const urlObj = new URL(cleanUrl);
+           domain = urlObj.hostname.replace('www.', '');
         }
       } catch (e) {
-        domain = url.toLowerCase();
+        // Fallback for partial domains like "facebook.com"
+        domain = url.toLowerCase().split('/')[0].replace('www.', '');
       }
     }
 
-    if (domain && domain !== 'None') {
+    // List of common types that shouldn't show a generic globe
+    const iconBaseClass = "w-full h-full flex items-center justify-center";
+
+    if (domain && domain.includes('.') && domain.length > 3) {
       return (
-        <img 
-          src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`} 
-          className="w-4 h-4 rounded-sm" 
-          alt=""
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://www.google.com/s2/favicons?domain=google.com&sz=64'; // very generic fallback
-          }}
-        />
+        <div className={iconBaseClass}>
+          <img 
+            src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${size}`} 
+            className="w-full h-full object-contain p-1" 
+            alt=""
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+              // Should we show a fallback icon? The parent container will show through
+            }}
+          />
+        </div>
       );
     }
 
     switch (type) {
-      case 'card': return <CreditCard size={18} />;
-      case 'identity': return <User size={18} />;
-      case 'note': return <FileText size={18} />;
-      case 'ssh': return <Terminal size={18} />;
-      default: return <Globe size={18} />;
+      case 'card': return <div className={iconBaseClass}><CreditCard size={size/4} /></div>;
+      case 'identity': return <div className={iconBaseClass}><User size={size/4} /></div>;
+      case 'note': return <div className={iconBaseClass}><FileText size={size/4} /></div>;
+      case 'ssh': return <div className={iconBaseClass}><Terminal size={size/4} /></div>;
+      default: return <div className={iconBaseClass}><Globe size={size/4} className="text-gray-200" /></div>;
     }
   };
 
