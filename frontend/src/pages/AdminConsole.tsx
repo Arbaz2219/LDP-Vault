@@ -231,7 +231,15 @@ const AdminConsole: React.FC = () => {
           {navItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id as any)}
+              onClick={() => {
+                if (item.id === 'reporting') {
+                  navigate('/security');
+                } else if (item.id === 'settings') {
+                  navigate('/settings');
+                } else {
+                  setActiveTab(item.id as any);
+                }
+              }}
               className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all ${
                 activeTab === item.id 
                 ? 'bg-[#d9e2f3] text-[#0d43af]' 

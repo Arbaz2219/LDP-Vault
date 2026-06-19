@@ -70,17 +70,31 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           )}
           
           {isAdmin && (
-            <Link
-              to="/admin"
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                location.pathname.startsWith('/admin') 
-                ? 'bg-white shadow-xl text-[#0d43af]' 
-                : 'bg-black/10 text-white/70 hover:bg-black/20'
-              }`}
-            >
-              <LayoutDashboard size={16} />
-              <span className="text-xs font-bold uppercase tracking-wider">Admin Console</span>
-            </Link>
+            <div className="space-y-3">
+              <Link
+                to="/security"
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  location.pathname === '/security' 
+                  ? 'bg-gradient-to-r from-cyan-400 to-blue-500 shadow-lg text-white' 
+                  : 'bg-white/5 text-cyan-400 hover:bg-white/10 border border-cyan-400/20'
+                }`}
+              >
+                <Shield size={16} />
+                <span className="text-xs font-bold uppercase tracking-wider">Security Dashboard</span>
+              </Link>
+
+              <Link
+                to="/admin"
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  location.pathname.startsWith('/admin') 
+                  ? 'bg-white shadow-xl text-[#0d43af]' 
+                  : 'bg-black/10 text-white/70 hover:bg-black/20'
+                }`}
+              >
+                <LayoutDashboard size={16} />
+                <span className="text-xs font-bold uppercase tracking-wider">Admin Console</span>
+              </Link>
+            </div>
           )}
 
         </div>
