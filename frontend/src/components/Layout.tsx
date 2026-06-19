@@ -8,7 +8,8 @@ import {
   BarChart2, 
   Settings, 
   LayoutDashboard, 
-  Lock
+  Lock,
+  Terminal
 } from 'lucide-react';
 import LDPLogo from './LDPLogo';
 
@@ -69,6 +70,17 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </Link>
           )}
           
+          {user?.portals?.includes('terminal') && (
+             <Link
+               to="/dashboard"
+               onClick={() => alert('Terminal Portal is being initialized... Please ensure LDP Terminal service is running.')}
+               className="flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-600/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-600/20 transition-all group"
+             >
+               <Terminal size={16} className="opacity-70 group-hover:opacity-100" />
+               <span className="text-xs font-bold uppercase tracking-wider">Terminal Portal</span>
+             </Link>
+          )}
+
           {isAdmin && (
             <div className="space-y-3">
               <Link

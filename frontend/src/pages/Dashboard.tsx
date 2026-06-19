@@ -397,9 +397,17 @@ const Dashboard: React.FC = () => {
       domain = extractDomain(url);
     }
     
-    if (name && type === 'login') {
-      // Smart Guess Pattern 1: No spaces, just .com
-      guessDomain = name.trim().toLowerCase().replace(/\s+/g, '') + '.com';
+    if (name && (type === 'login' || type === 'ssh')) {
+      // Smart Guess for Logins & Terminal Tools
+      const nameClean = name.trim().toLowerCase();
+      if (nameClean.includes('putty')) guessDomain = 'putty.org';
+      else if (nameClean.includes('moba')) guessDomain = 'mobaxterm.mobatek.net';
+      else if (nameClean.includes('superputty')) guessDomain = 'superputty.com';
+      else if (nameClean.includes('terminal')) guessDomain = 'iterm2.com';
+      else {
+        guessDomain = nameClean.replace(/\s+/g, '') + '.com';
+      }
+      
       if (!domain) domain = guessDomain;
     }
 
@@ -430,7 +438,6 @@ const Dashboard: React.FC = () => {
               } else if (target.src === googleUrl) {
                 target.src = duckUrl;
               } else if (target.src === duckUrl && guessDomain && domain !== guessDomain) {
-                // If all failed for URL domain, try the name-guessed domain
                 target.src = `https://logo.clearbit.com/${guessDomain}?size=${size}`;
               } else {
                 target.style.display = 'none';
