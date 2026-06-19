@@ -9,6 +9,7 @@ import Send from './pages/Send';
 import Tools from './pages/Tools';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import SecurityDashboard from './pages/SecurityDashboard';
 import SSOCallback from './pages/SSOCallback';
 import Layout from './components/Layout';
 
@@ -81,6 +82,7 @@ const AppContent: React.FC = () => {
               <Route path="/tools" element={<Tools />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/security" element={<SecurityDashboard />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
